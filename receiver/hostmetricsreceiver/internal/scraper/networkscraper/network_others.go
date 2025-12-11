@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	conntrackMetricsLen = 0
+	conntrackMetricsLen    = 0
+	socketBufferMetricsLen = 0
 )
 
 var allTCPStates = []string{
@@ -28,5 +29,9 @@ var allTCPStates = []string{
 }
 
 func (*networkScraper) recordNetworkConntrackMetrics(context.Context) error {
+	return nil
+}
+
+func (*networkScraper) recordNetworkSocketBufferMetrics(context.Context) error {
 	return nil
 }

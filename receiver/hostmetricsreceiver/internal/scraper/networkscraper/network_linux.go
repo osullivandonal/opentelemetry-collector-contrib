@@ -10,11 +10,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/networkscraper/internal/metadata"
+	"github.com/prometheus/procfs"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 )
 
 const (
-	conntrackMetricsLen = 2
+	conntrackMetricsLen    = 2
+	socketBufferMetricsLen = 4
 )
 
 var allTCPStates = []string{
@@ -43,5 +46,29 @@ func (s *networkScraper) recordNetworkConntrackMetrics(ctx context.Context) erro
 	}
 	s.mb.RecordSystemNetworkConntrackCountDataPoint(now, conntrack[0].ConnTrackCount)
 	s.mb.RecordSystemNetworkConntrackMaxDataPoint(now, conntrack[0].ConnTrackMax)
+	return nil
+}
+
+func (s *networkScraper) recordNetworkSocketBufferMetrics(ctx context.Context) error {
+	if !s.config.Metrics.SystemNetworkSocketBufferReceive.Enabled && !s.config.Metrics.SystemNetworkSocketBufferTransmit.Enabled {
+		return nil
+	}
+	fs, err := procfs.NewDefaultFS()
+	if err != nil {
+		return err
+	}
+
+	now := pcommon.NewTimestampFromTime(time.Now())
+	tcpSummary, err := fs.NetTCPSummary()
+	if err == nil {
+		s.mb.RecordSystemNetworkSocketBufferReceiveDataPoint(now, int64(tcpSummary.RxQueueLength), metadata.AttributeProtocolTcp)
+		s.mb.RecordSystemNetworkSocketBufferTransmitDataPoint(now, int64(tcpSummary.TxQueueLength), metadata.AttributeProtocolTcp)
+	}
+
+	udpSummary, err := fs.NetUDPSummary()
+	if err == nil {
+		s.mb.RecordSystemNetworkSocketBufferReceiveDataPoint(now, int64(udpSummary.RxQueueLength), metadata.AttributeProtocolUdp)
+		s.mb.RecordSystemNetworkSocketBufferTransmitDataPoint(now, int64(udpSummary.TxQueueLength), metadata.AttributeProtocolUdp)
+	}
 	return nil
 }
