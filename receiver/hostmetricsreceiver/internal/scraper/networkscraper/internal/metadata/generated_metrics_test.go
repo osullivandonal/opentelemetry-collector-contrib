@@ -85,6 +85,12 @@ func TestMetricsBuilder(t *testing.T) {
 			allMetricsCount++
 			mb.RecordSystemNetworkPacketsDataPoint(ts, 1, "device-val", AttributeDirectionReceive)
 
+			allMetricsCount++
+			mb.RecordSystemNetworkSocketBufferReceiveDataPoint(ts, 1, AttributeProtocolTcp)
+
+			allMetricsCount++
+			mb.RecordSystemNetworkSocketBufferTransmitDataPoint(ts, 1, AttributeProtocolTcp)
+
 			res := pcommon.NewResource()
 			metrics := mb.Emit(WithResource(res))
 
@@ -235,6 +241,40 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok = dp.Attributes().Get("direction")
 					assert.True(t, ok)
 					assert.Equal(t, "receive", attrVal.Str())
+				case "system.network.socket.buffer.receive":
+					assert.False(t, validatedMetrics["system.network.socket.buffer.receive"], "Found a duplicate in the metrics slice: system.network.socket.buffer.receive")
+					validatedMetrics["system.network.socket.buffer.receive"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "The total received buffer queue length across all TCP/UDP connections", ms.At(i).Description())
+					assert.Equal(t, "By", ms.At(i).Unit())
+					assert.False(t, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("protocol")
+					assert.True(t, ok)
+					assert.Equal(t, "tcp", attrVal.Str())
+				case "system.network.socket.buffer.transmit":
+					assert.False(t, validatedMetrics["system.network.socket.buffer.transmit"], "Found a duplicate in the metrics slice: system.network.socket.buffer.transmit")
+					validatedMetrics["system.network.socket.buffer.transmit"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "The total transmit buffer queue length across all TCP/UDP connections", ms.At(i).Description())
+					assert.Equal(t, "By", ms.At(i).Unit())
+					assert.False(t, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("protocol")
+					assert.True(t, ok)
+					assert.Equal(t, "tcp", attrVal.Str())
 				}
 			}
 		})

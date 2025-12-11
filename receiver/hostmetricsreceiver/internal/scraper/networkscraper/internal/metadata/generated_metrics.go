@@ -44,6 +44,7 @@ type AttributeProtocol int
 const (
 	_ AttributeProtocol = iota
 	AttributeProtocolTcp
+	AttributeProtocolUdp
 )
 
 // String returns the string representation of the AttributeProtocol.
@@ -51,6 +52,8 @@ func (av AttributeProtocol) String() string {
 	switch av {
 	case AttributeProtocolTcp:
 		return "tcp"
+	case AttributeProtocolUdp:
+		return "udp"
 	}
 	return ""
 }
@@ -58,6 +61,7 @@ func (av AttributeProtocol) String() string {
 // MapAttributeProtocol is a helper map of string to AttributeProtocol attribute value.
 var MapAttributeProtocol = map[string]AttributeProtocol{
 	"tcp": AttributeProtocolTcp,
+	"udp": AttributeProtocolUdp,
 }
 
 var MetricsInfo = metricsInfo{
@@ -82,16 +86,24 @@ var MetricsInfo = metricsInfo{
 	SystemNetworkPackets: metricInfo{
 		Name: "system.network.packets",
 	},
+	SystemNetworkSocketBufferReceive: metricInfo{
+		Name: "system.network.socket.buffer.receive",
+	},
+	SystemNetworkSocketBufferTransmit: metricInfo{
+		Name: "system.network.socket.buffer.transmit",
+	},
 }
 
 type metricsInfo struct {
-	SystemNetworkConnections    metricInfo
-	SystemNetworkConntrackCount metricInfo
-	SystemNetworkConntrackMax   metricInfo
-	SystemNetworkDropped        metricInfo
-	SystemNetworkErrors         metricInfo
-	SystemNetworkIo             metricInfo
-	SystemNetworkPackets        metricInfo
+	SystemNetworkConnections          metricInfo
+	SystemNetworkConntrackCount       metricInfo
+	SystemNetworkConntrackMax         metricInfo
+	SystemNetworkDropped              metricInfo
+	SystemNetworkErrors               metricInfo
+	SystemNetworkIo                   metricInfo
+	SystemNetworkPackets              metricInfo
+	SystemNetworkSocketBufferReceive  metricInfo
+	SystemNetworkSocketBufferTransmit metricInfo
 }
 
 type metricInfo struct {
@@ -470,21 +482,129 @@ func newMetricSystemNetworkPackets(cfg MetricConfig) metricSystemNetworkPackets 
 	return m
 }
 
+type metricSystemNetworkSocketBufferReceive struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills system.network.socket.buffer.receive metric with initial data.
+func (m *metricSystemNetworkSocketBufferReceive) init() {
+	m.data.SetName("system.network.socket.buffer.receive")
+	m.data.SetDescription("The total received buffer queue length across all TCP/UDP connections")
+	m.data.SetUnit("By")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricSystemNetworkSocketBufferReceive) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, protocolAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("protocol", protocolAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSystemNetworkSocketBufferReceive) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSystemNetworkSocketBufferReceive) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSystemNetworkSocketBufferReceive(cfg MetricConfig) metricSystemNetworkSocketBufferReceive {
+	m := metricSystemNetworkSocketBufferReceive{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSystemNetworkSocketBufferTransmit struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills system.network.socket.buffer.transmit metric with initial data.
+func (m *metricSystemNetworkSocketBufferTransmit) init() {
+	m.data.SetName("system.network.socket.buffer.transmit")
+	m.data.SetDescription("The total transmit buffer queue length across all TCP/UDP connections")
+	m.data.SetUnit("By")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricSystemNetworkSocketBufferTransmit) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, protocolAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("protocol", protocolAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSystemNetworkSocketBufferTransmit) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSystemNetworkSocketBufferTransmit) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSystemNetworkSocketBufferTransmit(cfg MetricConfig) metricSystemNetworkSocketBufferTransmit {
+	m := metricSystemNetworkSocketBufferTransmit{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user config.
 type MetricsBuilder struct {
-	config                            MetricsBuilderConfig // config of the metrics builder.
-	startTime                         pcommon.Timestamp    // start time that will be applied to all recorded data points.
-	metricsCapacity                   int                  // maximum observed number of metrics per resource.
-	metricsBuffer                     pmetric.Metrics      // accumulates metrics data before emitting.
-	buildInfo                         component.BuildInfo  // contains version information.
-	metricSystemNetworkConnections    metricSystemNetworkConnections
-	metricSystemNetworkConntrackCount metricSystemNetworkConntrackCount
-	metricSystemNetworkConntrackMax   metricSystemNetworkConntrackMax
-	metricSystemNetworkDropped        metricSystemNetworkDropped
-	metricSystemNetworkErrors         metricSystemNetworkErrors
-	metricSystemNetworkIo             metricSystemNetworkIo
-	metricSystemNetworkPackets        metricSystemNetworkPackets
+	config                                  MetricsBuilderConfig // config of the metrics builder.
+	startTime                               pcommon.Timestamp    // start time that will be applied to all recorded data points.
+	metricsCapacity                         int                  // maximum observed number of metrics per resource.
+	metricsBuffer                           pmetric.Metrics      // accumulates metrics data before emitting.
+	buildInfo                               component.BuildInfo  // contains version information.
+	metricSystemNetworkConnections          metricSystemNetworkConnections
+	metricSystemNetworkConntrackCount       metricSystemNetworkConntrackCount
+	metricSystemNetworkConntrackMax         metricSystemNetworkConntrackMax
+	metricSystemNetworkDropped              metricSystemNetworkDropped
+	metricSystemNetworkErrors               metricSystemNetworkErrors
+	metricSystemNetworkIo                   metricSystemNetworkIo
+	metricSystemNetworkPackets              metricSystemNetworkPackets
+	metricSystemNetworkSocketBufferReceive  metricSystemNetworkSocketBufferReceive
+	metricSystemNetworkSocketBufferTransmit metricSystemNetworkSocketBufferTransmit
 }
 
 // MetricBuilderOption applies changes to default metrics builder.
@@ -506,17 +626,19 @@ func WithStartTime(startTime pcommon.Timestamp) MetricBuilderOption {
 }
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, options ...MetricBuilderOption) *MetricsBuilder {
 	mb := &MetricsBuilder{
-		config:                            mbc,
-		startTime:                         pcommon.NewTimestampFromTime(time.Now()),
-		metricsBuffer:                     pmetric.NewMetrics(),
-		buildInfo:                         settings.BuildInfo,
-		metricSystemNetworkConnections:    newMetricSystemNetworkConnections(mbc.Metrics.SystemNetworkConnections),
-		metricSystemNetworkConntrackCount: newMetricSystemNetworkConntrackCount(mbc.Metrics.SystemNetworkConntrackCount),
-		metricSystemNetworkConntrackMax:   newMetricSystemNetworkConntrackMax(mbc.Metrics.SystemNetworkConntrackMax),
-		metricSystemNetworkDropped:        newMetricSystemNetworkDropped(mbc.Metrics.SystemNetworkDropped),
-		metricSystemNetworkErrors:         newMetricSystemNetworkErrors(mbc.Metrics.SystemNetworkErrors),
-		metricSystemNetworkIo:             newMetricSystemNetworkIo(mbc.Metrics.SystemNetworkIo),
-		metricSystemNetworkPackets:        newMetricSystemNetworkPackets(mbc.Metrics.SystemNetworkPackets),
+		config:                                  mbc,
+		startTime:                               pcommon.NewTimestampFromTime(time.Now()),
+		metricsBuffer:                           pmetric.NewMetrics(),
+		buildInfo:                               settings.BuildInfo,
+		metricSystemNetworkConnections:          newMetricSystemNetworkConnections(mbc.Metrics.SystemNetworkConnections),
+		metricSystemNetworkConntrackCount:       newMetricSystemNetworkConntrackCount(mbc.Metrics.SystemNetworkConntrackCount),
+		metricSystemNetworkConntrackMax:         newMetricSystemNetworkConntrackMax(mbc.Metrics.SystemNetworkConntrackMax),
+		metricSystemNetworkDropped:              newMetricSystemNetworkDropped(mbc.Metrics.SystemNetworkDropped),
+		metricSystemNetworkErrors:               newMetricSystemNetworkErrors(mbc.Metrics.SystemNetworkErrors),
+		metricSystemNetworkIo:                   newMetricSystemNetworkIo(mbc.Metrics.SystemNetworkIo),
+		metricSystemNetworkPackets:              newMetricSystemNetworkPackets(mbc.Metrics.SystemNetworkPackets),
+		metricSystemNetworkSocketBufferReceive:  newMetricSystemNetworkSocketBufferReceive(mbc.Metrics.SystemNetworkSocketBufferReceive),
+		metricSystemNetworkSocketBufferTransmit: newMetricSystemNetworkSocketBufferTransmit(mbc.Metrics.SystemNetworkSocketBufferTransmit),
 	}
 
 	for _, op := range options {
@@ -590,6 +712,8 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	mb.metricSystemNetworkErrors.emit(ils.Metrics())
 	mb.metricSystemNetworkIo.emit(ils.Metrics())
 	mb.metricSystemNetworkPackets.emit(ils.Metrics())
+	mb.metricSystemNetworkSocketBufferReceive.emit(ils.Metrics())
+	mb.metricSystemNetworkSocketBufferTransmit.emit(ils.Metrics())
 
 	for _, op := range options {
 		op.apply(rm)
@@ -644,6 +768,16 @@ func (mb *MetricsBuilder) RecordSystemNetworkIoDataPoint(ts pcommon.Timestamp, v
 // RecordSystemNetworkPacketsDataPoint adds a data point to system.network.packets metric.
 func (mb *MetricsBuilder) RecordSystemNetworkPacketsDataPoint(ts pcommon.Timestamp, val int64, deviceAttributeValue string, directionAttributeValue AttributeDirection) {
 	mb.metricSystemNetworkPackets.recordDataPoint(mb.startTime, ts, val, deviceAttributeValue, directionAttributeValue.String())
+}
+
+// RecordSystemNetworkSocketBufferReceiveDataPoint adds a data point to system.network.socket.buffer.receive metric.
+func (mb *MetricsBuilder) RecordSystemNetworkSocketBufferReceiveDataPoint(ts pcommon.Timestamp, val int64, protocolAttributeValue AttributeProtocol) {
+	mb.metricSystemNetworkSocketBufferReceive.recordDataPoint(mb.startTime, ts, val, protocolAttributeValue.String())
+}
+
+// RecordSystemNetworkSocketBufferTransmitDataPoint adds a data point to system.network.socket.buffer.transmit metric.
+func (mb *MetricsBuilder) RecordSystemNetworkSocketBufferTransmitDataPoint(ts pcommon.Timestamp, val int64, protocolAttributeValue AttributeProtocol) {
+	mb.metricSystemNetworkSocketBufferTransmit.recordDataPoint(mb.startTime, ts, val, protocolAttributeValue.String())
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

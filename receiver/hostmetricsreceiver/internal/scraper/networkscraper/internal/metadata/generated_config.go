@@ -27,13 +27,15 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsConfig provides config for network metrics.
 type MetricsConfig struct {
-	SystemNetworkConnections    MetricConfig `mapstructure:"system.network.connections"`
-	SystemNetworkConntrackCount MetricConfig `mapstructure:"system.network.conntrack.count"`
-	SystemNetworkConntrackMax   MetricConfig `mapstructure:"system.network.conntrack.max"`
-	SystemNetworkDropped        MetricConfig `mapstructure:"system.network.dropped"`
-	SystemNetworkErrors         MetricConfig `mapstructure:"system.network.errors"`
-	SystemNetworkIo             MetricConfig `mapstructure:"system.network.io"`
-	SystemNetworkPackets        MetricConfig `mapstructure:"system.network.packets"`
+	SystemNetworkConnections          MetricConfig `mapstructure:"system.network.connections"`
+	SystemNetworkConntrackCount       MetricConfig `mapstructure:"system.network.conntrack.count"`
+	SystemNetworkConntrackMax         MetricConfig `mapstructure:"system.network.conntrack.max"`
+	SystemNetworkDropped              MetricConfig `mapstructure:"system.network.dropped"`
+	SystemNetworkErrors               MetricConfig `mapstructure:"system.network.errors"`
+	SystemNetworkIo                   MetricConfig `mapstructure:"system.network.io"`
+	SystemNetworkPackets              MetricConfig `mapstructure:"system.network.packets"`
+	SystemNetworkSocketBufferReceive  MetricConfig `mapstructure:"system.network.socket.buffer.receive"`
+	SystemNetworkSocketBufferTransmit MetricConfig `mapstructure:"system.network.socket.buffer.transmit"`
 }
 
 func DefaultMetricsConfig() MetricsConfig {
@@ -58,6 +60,12 @@ func DefaultMetricsConfig() MetricsConfig {
 		},
 		SystemNetworkPackets: MetricConfig{
 			Enabled: true,
+		},
+		SystemNetworkSocketBufferReceive: MetricConfig{
+			Enabled: false,
+		},
+		SystemNetworkSocketBufferTransmit: MetricConfig{
+			Enabled: false,
 		},
 	}
 }
