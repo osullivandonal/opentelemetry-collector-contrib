@@ -24,7 +24,7 @@ The number of connections.
 
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
-| protocol | Network protocol, e.g. TCP or UDP. | Str: ``tcp`` | Recommended |
+| protocol | Network protocol, e.g. TCP or UDP. | Str: ``tcp``, ``udp`` | Recommended |
 | state | State of the network connection. | Any Str | Recommended |
 
 ### system.network.dropped
@@ -112,3 +112,31 @@ The limit for entries in the conntrack table.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {entries} | Sum | Int | Cumulative | false | Development |
+
+### system.network.socket.buffer.receive
+
+The total received buffer queue length across all TCP/UDP connections
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| By | Sum | Int | Cumulative | false | Development |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| protocol | Network protocol, e.g. TCP or UDP. | Str: ``tcp``, ``udp`` | Recommended |
+
+### system.network.socket.buffer.transmit
+
+The total transmit buffer queue length across all TCP/UDP connections
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| By | Sum | Int | Cumulative | false | Development |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| protocol | Network protocol, e.g. TCP or UDP. | Str: ``tcp``, ``udp`` | Recommended |
