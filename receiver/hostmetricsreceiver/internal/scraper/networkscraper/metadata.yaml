@@ -21,7 +21,7 @@ attributes:
   protocol:
     description: Network protocol, e.g. TCP or UDP.
     type: string
-    enum: [tcp]
+    enum: [tcp, udp]
   state:
     description: State of the network connection.
     type: string
@@ -102,3 +102,25 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [device, direction]
+  system.network.socket.buffer.receive:
+    enabled: false
+    description: The total received buffer queue length across all TCP/UDP connections
+    unit: "By"
+    stability:
+      level: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: false
+    attributes: [protocol]
+  system.network.socket.buffer.transmit:
+    enabled: false
+    description: The total transmit buffer queue length across all TCP/UDP connections
+    unit: "By"
+    stability:
+      level: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: false
+    attributes: [protocol]
