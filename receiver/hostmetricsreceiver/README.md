@@ -220,7 +220,7 @@ export OTEL_RESOURCE_ATTRIBUTES="service.name=<the name of your service>,service
 
 **Platform**: Linux only
 
-When this feature gate is enabled, the "used" value for the `system.memory.usage` and `system.memory.utilization` metrics is calculated based on Linux kernel's `MemAvailable` statistic instead of the legacy formula.
+When this feature gate is enabled, the "used" value for the `system.memory.usage` and `system.memory.utilization` metrics is calculated based on the Linux kernel's `MemAvailable` statistic instead of the legacy formula.
 
 **Behavior change**:
 - **Enabled** (new behavior): Used memory = `Total - Available`
