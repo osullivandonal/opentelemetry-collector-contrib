@@ -213,3 +213,39 @@ export OTEL_RESOURCE_ATTRIBUTES="service.name=<the name of your service>,service
 ## Entity Events
 
 **Entity Events as logs are experimental** and might eventually be replaced by the result of [the OTEP](https://github.com/open-telemetry/oteps/blob/main/text/entities/0256-entities-data-model.md#entity-events). For now, the hostmetrics receiver can send the host entity event as a log records. By default, the hostmetrics receiver sends periodic EntityState events every 5 minutes. You can change that by setting `metadata_collection_interval`. Entity Events as logs are experimental. The result of the OTEP might eventually replace that.
+
+## Feature Gates
+
+### `receiver.hostmetricsreceiver.UseLinuxMemAvailable`
+
+**Platform**: Linux only
+
+When this feature gate is enabled, the "used" value for the `system.memory.usage` and `system.memory.utilization` metrics is calculated based on Linux kernel's `MemAvailable` statistic instead of the legacy formula.
+
+**Behavior change**:
+- **Enabled** (new behavior): Used memory = `Total - Available`
+- **Disabled** (legacy behavior): Used memory = `Total - Free - Buffers - Cached`
+
+The `MemAvailable` statistic provides a more accurate representation of memory that is actually available for starting new applications, as it's computed by the Linux kernel with knowledge of internal memory management details.
+
+**Impact**: Enabling this feature gate will change the reported "used" memory values, which may affect dashboards, alerts, and monitoring thresholds that depend on these metrics.
+
+**Status**: Beta (enabled by default) since v0.137.0
+
+**Reference**: [Issue #42221](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/42221)
+
+### `hostmetrics.process.bootTimeCache`
+
+When this feature gate is enabled, the process scraper caches the system boot time value at startup and reuses it for all process scrapes, instead of querying it on every scrape.
+
+**Behavior change**:
+- **Enabled** (new behavior): Boot time is fetched once at collector startup and cached
+- **Disabled** (legacy behavior): Boot time is queried from the system on every scrape interval
+
+**Benefits**: This feature gate improves performance by eliminating redundant system calls to retrieve the boot time, which is a value that rarely changes (only when the system reboots). This is especially beneficial in environments with short scrape intervals or many processes being monitored.
+
+**Impact**: Minimal. In the rare case where the system reboots while the collector is running, the cached boot time would be stale until the collector is restarted. However, in practice, collectors are typically restarted when the system reboots.
+
+**Status**: Beta (enabled by default) since v0.98.0
+
+**Reference**: [Issue #28849](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/28849)
