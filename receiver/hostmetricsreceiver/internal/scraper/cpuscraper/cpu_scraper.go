@@ -16,7 +16,9 @@ import (
 	"go.opentelemetry.io/collector/scraper"
 	"go.opentelemetry.io/collector/scraper/scrapererror"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/featuregates"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/internal/metadata"
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/internal/metadata_semconv"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/ucal"
 )
 
@@ -27,10 +29,11 @@ const (
 
 // cpuScraper for CPU Metrics
 type cpuScraper struct {
-	settings scraper.Settings
-	config   *Config
-	mb       *metadata.MetricsBuilder
-	ucal     *ucal.CPUUtilizationCalculator
+	settings  scraper.Settings
+	config    *Config
+	mb        *metadata.MetricsBuilder
+	mbSemconv *metadata_semconv.MetricsBuilder
+	ucal      *ucal.CPUUtilizationCalculator
 
 	// for mocking
 	bootTime func(context.Context) (uint64, error)
@@ -45,7 +48,15 @@ type cpuInfo struct {
 
 // newCPUScraper creates a set of CPU related metrics
 func newCPUScraper(_ context.Context, settings scraper.Settings, cfg *Config) *cpuScraper {
-	return &cpuScraper{settings: settings, config: cfg, bootTime: host.BootTimeWithContext, times: cpu.TimesWithContext, ucal: &ucal.CPUUtilizationCalculator{}, now: time.Now}
+	s := &cpuScraper{
+		config:   cfg,
+		settings: settings,
+		ucal:     &ucal.CPUUtilizationCalculator{},
+		bootTime: host.BootTimeWithContext,
+		times:    cpu.TimesWithContext,
+		now:      time.Now,
+	}
+	return s
 }
 
 func (s *cpuScraper) start(ctx context.Context, _ component.Host) error {
@@ -53,7 +64,26 @@ func (s *cpuScraper) start(ctx context.Context, _ component.Host) error {
 	if err != nil {
 		return err
 	}
-	s.mb = metadata.NewMetricsBuilder(s.config.MetricsBuilderConfig, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
+
+	startTime := pcommon.Timestamp(bootTime * 1e9)
+
+	// Initialize legacy builder if gate is enabled
+	if featuregates.EmitOldMetrics.IsEnabled() {
+		s.mb = metadata.NewMetricsBuilder(
+			s.config.MetricsBuilderConfig,
+			s.settings,
+			metadata.WithStartTime(startTime),
+		)
+	}
+
+	// Initialize semconv builder if gate is enabled
+	if featuregates.EmitSemconvMetrics.IsEnabled() {
+		s.mbSemconv = metadata_semconv.NewMetricsBuilder(
+			s.config.Semconv,
+			s.settings,
+			metadata_semconv.WithStartTime(startTime),
+		)
+	}
 	return nil
 }
 
@@ -64,8 +94,18 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
 	}
 
-	for _, cpuTime := range cpuTimes {
-		s.recordCPUTimeStateDataPoints(now, cpuTime)
+	// Record legacy metrics
+	if s.mb != nil {
+		for _, cpuTime := range cpuTimes {
+			s.recordCPUTimeStateDataPoints(now, cpuTime)
+		}
+	}
+
+	// Record semconv metrics
+	if s.mbSemconv != nil {
+		for _, cpuTime := range cpuTimes {
+			s.recordCPUTimeStateDataPoints(now, cpuTime)
+		}
 	}
 
 	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
@@ -99,5 +139,35 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		}
 	}
 
-	return s.mb.Emit(), nil
+	if s.mbSemconv != nil && s.config.Semconv.Metrics.SystemCPUFrequencyNew.Enabled {
+		cpuInfos, err := s.getCPUInfo()
+		if err != nil {
+			return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
+		}
+		for _, cInfo := range cpuInfos {
+			s.mbSemconv.RecordSystemCPUFrequencyNewDataPoint(now, cInfo.frequency*hzInAMHz, fmt.Sprintf("cpu%d", cInfo.processor))
+		}
+	}
+
+	return s.emitMetrics(), nil
+}
+
+func (s *cpuScraper) emitMetrics() pmetric.Metrics {
+	var metrics pmetric.Metrics
+
+	if s.mb != nil {
+		metrics = s.mb.Emit()
+	}
+
+	if s.mbSemconv != nil {
+		semconvMetrics := s.mbSemconv.Emit()
+		if metrics.ResourceMetrics().Len() == 0 {
+			metrics = semconvMetrics
+		} else {
+			// Merge semconv metrics into the result
+			semconvMetrics.ResourceMetrics().MoveAndAppendTo(metrics.ResourceMetrics())
+		}
+	}
+
+	return metrics
 }

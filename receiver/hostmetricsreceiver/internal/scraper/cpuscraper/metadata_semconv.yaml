@@ -1,0 +1,30 @@
+type: cpu
+
+generated_package_name: metadata_semconv
+
+status:
+  class: scraper
+  stability:
+    beta: [metrics]
+  distributions: [core, contrib, k8s]
+  codeowners:
+    active: [dmitryax, braydonk]
+
+sem_conv_version: 1.27.0
+
+attributes:
+  cpu:
+    description: Logical CPU number starting at 0.
+    type: string
+
+metrics:
+  system.cpu.frequency.new:
+    enabled: true
+    description: Current frequency of the CPU core in Hz, the new version.
+    unit: "Hz"
+    stability:
+      level: development
+    gauge:
+      value_type: double
+    attributes: [cpu]
+

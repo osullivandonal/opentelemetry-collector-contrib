@@ -1,0 +1,9 @@
+default:
+all_set:
+  metrics:
+    system.cpu.frequency.new:
+      enabled: true
+none_set:
+  metrics:
+    system.cpu.frequency.new:
+      enabled: false
