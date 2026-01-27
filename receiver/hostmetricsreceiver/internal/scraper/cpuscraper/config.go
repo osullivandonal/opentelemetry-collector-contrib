@@ -16,7 +16,7 @@ import (
 // Config relating to CPU Metric Scraper.
 type Config struct {
 	metadata.MetricsBuilderConfig `mapstructure:",squash"`
-	Semconv                       metadata_semconv.MetricsBuilderConfig `mapstructure:"semconv"`
+	Semconv                       metadata_semconv.MetricsConfig `mapstructure:"metrics_semconv"`
 }
 
 // Unmarshal handles backward compatibility and validation

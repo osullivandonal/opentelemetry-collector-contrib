@@ -79,7 +79,7 @@ func (s *cpuScraper) start(ctx context.Context, _ component.Host) error {
 	// Initialize semconv builder if gate is enabled
 	if featuregates.EmitSemconvMetrics.IsEnabled() {
 		s.mbSemconv = metadata_semconv.NewMetricsBuilder(
-			s.config.Semconv,
+			metadata_semconv.MetricsBuilderConfig{Metrics: s.config.Semconv},
 			s.settings,
 			metadata_semconv.WithStartTime(startTime),
 		)
@@ -139,7 +139,7 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		}
 	}
 
-	if s.mbSemconv != nil && s.config.Semconv.Metrics.SystemCPUFrequencyNew.Enabled {
+	if s.mbSemconv != nil && s.config.Semconv.SystemCPUFrequencyNew.Enabled {
 		cpuInfos, err := s.getCPUInfo()
 		if err != nil {
 			return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
