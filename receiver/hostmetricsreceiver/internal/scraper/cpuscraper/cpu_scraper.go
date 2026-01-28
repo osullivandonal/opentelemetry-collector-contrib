@@ -101,13 +101,6 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		}
 	}
 
-	// Record semconv metrics
-	if s.mbSemconv != nil {
-		for _, cpuTime := range cpuTimes {
-			s.recordCPUTimeStateDataPoints(now, cpuTime)
-		}
-	}
-
 	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
 	if err != nil {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
