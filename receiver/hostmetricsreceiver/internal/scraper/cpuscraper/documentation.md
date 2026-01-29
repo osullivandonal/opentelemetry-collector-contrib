@@ -12,13 +12,14 @@ metrics:
     enabled: false
 ```
 
+
 ### system.cpu.time
 
-Total seconds each logical CPU spent on each mode.
+CPU time in seconds (legacy format)
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| s | Sum | Double | Cumulative | true | Development |
+| s | Sum | Double | Cumulative | true | Deprecated |
 
 #### Attributes
 
@@ -37,6 +38,7 @@ metrics:
     enabled: true
 ```
 
+
 ### system.cpu.frequency
 
 Current frequency of the CPU core in Hz.
@@ -51,6 +53,7 @@ Current frequency of the CPU core in Hz.
 | ---- | ----------- | ------ | -------- |
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended |
 
+
 ### system.cpu.logical.count
 
 Number of available logical CPUs.
@@ -59,6 +62,7 @@ Number of available logical CPUs.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {cpu} | Sum | Int | Cumulative | false | Development |
 
+
 ### system.cpu.physical.count
 
 Number of available physical CPUs.
@@ -66,6 +70,24 @@ Number of available physical CPUs.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {cpu} | Sum | Int | Cumulative | false | Development |
+
+
+### system.cpu.time
+Configuration key: `system.cpu.time/v2`
+
+CPU time in seconds (new semantic conventions)
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Beta |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| cpu | Logical CPU number starting at 0. | Any Str | Recommended |
+| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
+
 
 ### system.cpu.utilization
 

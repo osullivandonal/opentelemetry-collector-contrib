@@ -361,8 +361,8 @@ github.com/knadh/koanf/providers/file v1.2.1 h1:bEWbtQwYrA+W2DtdBrQWyXqJaJSG3KrP
 github.com/knadh/koanf/providers/file v1.2.1/go.mod h1:bp1PM5f83Q+TOUu10J/0ApLBd9uIzg+n9UgthfY+nRA=
 github.com/knadh/koanf/providers/fs v1.0.0 h1:tvn4MrduLgdOSUqqEHULUuIcELXf6xDOpH8GUErpYaY=
 github.com/knadh/koanf/providers/fs v1.0.0/go.mod h1:FksHET+xXFNDozvj8ZCdom54OnZ6eGKJtC5FhZJKx/8=
-github.com/knadh/koanf/v2 v2.3.0 h1:Qg076dDRFHvqnKG97ZEsi9TAg2/nFTa9hCdcSa1lvlM=
-github.com/knadh/koanf/v2 v2.3.0/go.mod h1:gRb40VRAbd4iJMYYD5IxZ6hfuopFcXBpc9bbQpZwo28=
+github.com/knadh/koanf/v2 v2.3.2 h1:Ee6tuzQYFwcZXQpc2MiVeC6qHMandf5SMUJJNoFp/c4=
+github.com/knadh/koanf/v2 v2.3.2/go.mod h1:gRb40VRAbd4iJMYYD5IxZ6hfuopFcXBpc9bbQpZwo28=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
@@ -631,8 +631,6 @@ go.opentelemetry.io/build-tools/multimod v0.29.0 h1:hVXibTuNuJumtn3cpzqPOX2xmcO+
 go.opentelemetry.io/build-tools/multimod v0.29.0/go.mod h1:tx762Z6RQe5Twkd04q1zzpmGQGtSljbKRy/P61EnJpo=
 go.opentelemetry.io/collector/cmd/builder v0.144.1-0.20260121161034-55399d4743af h1:1U0kWL6GVkOsYjkfkahLf0e/bnjL2H18WXRqfpoH9A0=
 go.opentelemetry.io/collector/cmd/builder v0.144.1-0.20260121161034-55399d4743af/go.mod h1:j8STDjN940/ozMZVUUi7DQF+dyoihEz5PzI5rPDIz80=
-go.opentelemetry.io/collector/cmd/mdatagen v0.144.1-0.20260121161034-55399d4743af h1:D6UtLDpVaz7LptjqTS3cegJ5lSnP+VNUw2d6YEnhQns=
-go.opentelemetry.io/collector/cmd/mdatagen v0.144.1-0.20260121161034-55399d4743af/go.mod h1:7K8US+AtyOZA95pCKy+c4GzUyGWAUYCdJThnvRcNolc=
 go.opentelemetry.io/collector/component v1.50.1-0.20260121161034-55399d4743af h1:kV5WsN1wEGnUGmpMUobvGO4L7Hxj03JYNyStu2NANdA=
 go.opentelemetry.io/collector/component v1.50.1-0.20260121161034-55399d4743af/go.mod h1:S0p+mq0ZvEEN67BKWt0atC5cHn2Km8vBeeIZuYzD0XU=
 go.opentelemetry.io/collector/confmap v1.50.1-0.20260121161034-55399d4743af h1:m/Wl4elDFKPJYJAOeUYdgjrk3ABFjlxaMYtUhIr1MeQ=

@@ -53,16 +53,33 @@ metrics:
       monotonic: false
       aggregation_temporality: cumulative
 
+  # Legacy metric - deprecated but still enabled by default for backward compatibility
   system.cpu.time:
     enabled: true
-    description: Total seconds each logical CPU spent on each mode.
-    unit: s
+    description: CPU time in seconds (legacy format)
     stability:
-      level: development
+      level: deprecated
+    unit: s
     sum:
       value_type: double
-      aggregation_temporality: cumulative
       monotonic: true
+      aggregation_temporality: cumulative
+    attributes: [cpu, state]
+    warnings:
+      if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.time/v2 instead.
+
+  # New semconv metric - disabled by default, users opt-in
+  system.cpu.time/v2:
+    name: system.cpu.time   # Same emitted metric name
+    enabled: false
+    description: CPU time in seconds (new semantic conventions)
+    stability:
+      level: beta
+    unit: s
+    sum:
+      value_type: double
+      monotonic: true
+      aggregation_temporality: cumulative
     attributes: [cpu, state]
 
   system.cpu.utilization:

@@ -68,6 +68,10 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		s.recordCPUTimeStateDataPoints(now, cpuTime)
 	}
 
+	for _, cpuTime := range cpuTimes {
+		s.recordCPUTimeV2StateDataPoints(now, cpuTime)
+	}
+
 	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
 	if err != nil {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)

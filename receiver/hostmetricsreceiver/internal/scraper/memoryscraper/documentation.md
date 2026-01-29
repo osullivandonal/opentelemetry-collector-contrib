@@ -12,6 +12,7 @@ metrics:
     enabled: false
 ```
 
+
 ### system.memory.usage
 
 Bytes of memory in use.
@@ -36,6 +37,7 @@ metrics:
     enabled: true
 ```
 
+
 ### system.linux.memory.available
 
 An estimate of how much memory is available for starting new applications, without swapping. This is a more accurate alternative than system.memory.usage with state=free. (Linux only)
@@ -43,6 +45,7 @@ An estimate of how much memory is available for starting new applications, witho
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
+
 
 ### system.linux.memory.dirty
 
@@ -52,6 +55,7 @@ The amount of dirty memory according to `/proc/meminfo`.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
 
+
 ### system.memory.limit
 
 Total bytes of memory available.
@@ -60,6 +64,7 @@ Total bytes of memory available.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
 
+
 ### system.memory.page_size
 
 A constant value for the system's configured page size.
@@ -67,6 +72,7 @@ A constant value for the system's configured page size.
 | Unit | Metric Type | Value Type | Stability |
 | ---- | ----------- | ---------- | --------- |
 | By | Gauge | Int | Development |
+
 
 ### system.memory.utilization
 

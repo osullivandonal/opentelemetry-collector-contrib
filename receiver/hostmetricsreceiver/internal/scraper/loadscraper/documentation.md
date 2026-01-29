@@ -12,6 +12,7 @@ metrics:
     enabled: false
 ```
 
+
 ### system.cpu.load_average.15m
 
 Average CPU Load over 15 minutes.
@@ -20,6 +21,7 @@ Average CPU Load over 15 minutes.
 | ---- | ----------- | ---------- | --------- |
 | {thread} | Gauge | Double | Development |
 
+
 ### system.cpu.load_average.1m
 
 Average CPU Load over 1 minute.
@@ -27,6 +29,7 @@ Average CPU Load over 1 minute.
 | Unit | Metric Type | Value Type | Stability |
 | ---- | ----------- | ---------- | --------- |
 | {thread} | Gauge | Double | Development |
+
 
 ### system.cpu.load_average.5m
 

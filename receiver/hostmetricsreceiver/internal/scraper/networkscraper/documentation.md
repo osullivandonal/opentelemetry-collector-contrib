@@ -12,6 +12,7 @@ metrics:
     enabled: false
 ```
 
+
 ### system.network.connections
 
 The number of connections.
@@ -26,6 +27,7 @@ The number of connections.
 | ---- | ----------- | ------ | -------- |
 | protocol | Network protocol, e.g. TCP or UDP. | Str: ``tcp`` | Recommended |
 | state | State of the network connection. | Any Str | Recommended |
+
 
 ### system.network.dropped
 
@@ -42,6 +44,7 @@ The number of packets dropped.
 | device | Name of the network interface. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (receive or transmit). | Str: ``receive``, ``transmit`` | Recommended |
 
+
 ### system.network.errors
 
 The number of errors encountered.
@@ -57,6 +60,7 @@ The number of errors encountered.
 | device | Name of the network interface. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (receive or transmit). | Str: ``receive``, ``transmit`` | Recommended |
 
+
 ### system.network.io
 
 The number of bytes transmitted and received.
@@ -71,6 +75,7 @@ The number of bytes transmitted and received.
 | ---- | ----------- | ------ | -------- |
 | device | Name of the network interface. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (receive or transmit). | Str: ``receive``, ``transmit`` | Recommended |
+
 
 ### system.network.packets
 
@@ -97,6 +102,7 @@ metrics:
     enabled: true
 ```
 
+
 ### system.network.conntrack.count
 
 The count of entries in conntrack table.
@@ -104,6 +110,7 @@ The count of entries in conntrack table.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {entries} | Sum | Int | Cumulative | false | Development |
+
 
 ### system.network.conntrack.max
 

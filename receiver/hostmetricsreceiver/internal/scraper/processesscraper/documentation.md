@@ -12,6 +12,7 @@ metrics:
     enabled: false
 ```
 
+
 ### system.processes.count
 
 Total number of processes in each state.
@@ -25,6 +26,7 @@ Total number of processes in each state.
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
 | status | Breakdown status of the processes. | Str: ``blocked``, ``daemon``, ``detached``, ``idle``, ``locked``, ``orphan``, ``paging``, ``running``, ``sleeping``, ``stopped``, ``system``, ``unknown``, ``zombies`` | Recommended |
+
 
 ### system.processes.created
 

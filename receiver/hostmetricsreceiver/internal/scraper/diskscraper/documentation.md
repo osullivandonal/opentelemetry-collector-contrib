@@ -12,6 +12,7 @@ metrics:
     enabled: false
 ```
 
+
 ### system.disk.io
 
 Disk bytes transferred.
@@ -27,6 +28,7 @@ Disk bytes transferred.
 | device | Name of the disk. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (read or write). | Str: ``read``, ``write`` | Recommended |
 
+
 ### system.disk.io_time
 
 Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time.
@@ -40,6 +42,7 @@ Time disk spent activated. On Windows, this is calculated as the inverse of disk
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
 | device | Name of the disk. | Any Str | Recommended |
+
 
 ### system.disk.merged
 
@@ -56,6 +59,7 @@ The number of disk reads/writes merged into single physical disk access operatio
 | device | Name of the disk. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (read or write). | Str: ``read``, ``write`` | Recommended |
 
+
 ### system.disk.operation_time
 
 Time spent in disk operations.
@@ -70,6 +74,7 @@ Time spent in disk operations.
 | ---- | ----------- | ------ | -------- |
 | device | Name of the disk. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (read or write). | Str: ``read``, ``write`` | Recommended |
+
 
 ### system.disk.operations
 
@@ -86,6 +91,7 @@ Disk operations count.
 | device | Name of the disk. | Any Str | Recommended |
 | direction | Direction of flow of bytes/operations (read or write). | Str: ``read``, ``write`` | Recommended |
 
+
 ### system.disk.pending_operations
 
 The queue size of pending I/O operations.
@@ -99,6 +105,7 @@ The queue size of pending I/O operations.
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
 | device | Name of the disk. | Any Str | Recommended |
+
 
 ### system.disk.weighted_io_time
 

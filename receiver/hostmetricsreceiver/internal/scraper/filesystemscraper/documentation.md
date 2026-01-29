@@ -12,6 +12,7 @@ metrics:
     enabled: false
 ```
 
+
 ### system.filesystem.inodes.usage
 
 FileSystem inodes used.
@@ -29,6 +30,7 @@ FileSystem inodes used.
 | mountpoint | Mountpoint path. | Any Str | Recommended |
 | type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended |
 | state | Breakdown of filesystem usage by type. | Str: ``free``, ``reserved``, ``used`` | Recommended |
+
 
 ### system.filesystem.usage
 
@@ -57,6 +59,7 @@ metrics:
   <metric_name>:
     enabled: true
 ```
+
 
 ### system.filesystem.utilization
 

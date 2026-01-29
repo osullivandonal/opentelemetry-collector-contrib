@@ -9,6 +9,8 @@ all_set:
       enabled: true
     system.cpu.time:
       enabled: true
+    system.cpu.time/v2:
+      enabled: true
     system.cpu.utilization:
       enabled: true
 none_set:
@@ -20,6 +22,8 @@ none_set:
     system.cpu.physical.count:
       enabled: false
     system.cpu.time:
+      enabled: false
+    system.cpu.time/v2:
       enabled: false
     system.cpu.utilization:
       enabled: false
