@@ -60,7 +60,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordSystemCPUFrequencyNewDataPoint(ts, 1, "cpu-val")
+			mb.RecordSystemCPUFrequencyDataPoint(ts, 1, "cpu-val", "test-val")
 
 			res := pcommon.NewResource()
 			metrics := mb.Emit(WithResource(res))
@@ -84,9 +84,9 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for i := 0; i < ms.Len(); i++ {
 				switch ms.At(i).Name() {
-				case "system.cpu.frequency.new":
-					assert.False(t, validatedMetrics["system.cpu.frequency.new"], "Found a duplicate in the metrics slice: system.cpu.frequency.new")
-					validatedMetrics["system.cpu.frequency.new"] = true
+				case "system.cpu.frequency":
+					assert.False(t, validatedMetrics["system.cpu.frequency"], "Found a duplicate in the metrics slice: system.cpu.frequency")
+					validatedMetrics["system.cpu.frequency"] = true
 					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
 					assert.Equal(t, "Current frequency of the CPU core in Hz, the new version.", ms.At(i).Description())
@@ -99,6 +99,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("cpu")
 					assert.True(t, ok)
 					assert.Equal(t, "cpu-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("test")
+					assert.True(t, ok)
+					assert.Equal(t, "test-val", attrVal.Str())
 				}
 			}
 		})

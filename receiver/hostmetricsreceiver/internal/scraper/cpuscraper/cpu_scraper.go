@@ -132,13 +132,18 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		}
 	}
 
-	if s.mbSemconv != nil && s.config.Semconv.SystemCPUFrequencyNew.Enabled {
+	if s.mbSemconv != nil && s.config.Semconv.SystemCPUFrequency.Enabled {
 		cpuInfos, err := s.getCPUInfo()
 		if err != nil {
 			return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
 		}
 		for _, cInfo := range cpuInfos {
-			s.mbSemconv.RecordSystemCPUFrequencyNewDataPoint(now, cInfo.frequency*hzInAMHz, fmt.Sprintf("cpu%d", cInfo.processor))
+			s.mbSemconv.RecordSystemCPUFrequencyDataPoint(
+				now,
+				cInfo.frequency*hzInAMHz,
+				fmt.Sprintf("cpu%d", cInfo.processor),
+				fmt.Sprintf("test attribute, CPU freq: %v", cInfo.frequency),
+			)
 		}
 	}
 

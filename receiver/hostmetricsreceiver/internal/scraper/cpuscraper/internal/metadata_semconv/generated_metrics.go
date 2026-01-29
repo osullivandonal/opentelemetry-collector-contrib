@@ -13,35 +13,35 @@ import (
 )
 
 var MetricsInfo = metricsInfo{
-	SystemCPUFrequencyNew: metricInfo{
-		Name: "system.cpu.frequency.new",
+	SystemCPUFrequency: metricInfo{
+		Name: "system.cpu.frequency",
 	},
 }
 
 type metricsInfo struct {
-	SystemCPUFrequencyNew metricInfo
+	SystemCPUFrequency metricInfo
 }
 
 type metricInfo struct {
 	Name string
 }
 
-type metricSystemCPUFrequencyNew struct {
+type metricSystemCPUFrequency struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	config   MetricConfig   // metric config provided by user.
 	capacity int            // max observed number of data points added to the metric.
 }
 
-// init fills system.cpu.frequency.new metric with initial data.
-func (m *metricSystemCPUFrequencyNew) init() {
-	m.data.SetName("system.cpu.frequency.new")
+// init fills system.cpu.frequency metric with initial data.
+func (m *metricSystemCPUFrequency) init() {
+	m.data.SetName("system.cpu.frequency")
 	m.data.SetDescription("Current frequency of the CPU core in Hz, the new version.")
 	m.data.SetUnit("Hz")
 	m.data.SetEmptyGauge()
 	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricSystemCPUFrequencyNew) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
+func (m *metricSystemCPUFrequency) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string, testAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -50,17 +50,18 @@ func (m *metricSystemCPUFrequencyNew) recordDataPoint(start pcommon.Timestamp, t
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("cpu", cpuAttributeValue)
+	dp.Attributes().PutStr("test", testAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
-func (m *metricSystemCPUFrequencyNew) updateCapacity() {
+func (m *metricSystemCPUFrequency) updateCapacity() {
 	if m.data.Gauge().DataPoints().Len() > m.capacity {
 		m.capacity = m.data.Gauge().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
-func (m *metricSystemCPUFrequencyNew) emit(metrics pmetric.MetricSlice) {
+func (m *metricSystemCPUFrequency) emit(metrics pmetric.MetricSlice) {
 	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
 		m.updateCapacity()
 		m.data.MoveTo(metrics.AppendEmpty())
@@ -68,8 +69,8 @@ func (m *metricSystemCPUFrequencyNew) emit(metrics pmetric.MetricSlice) {
 	}
 }
 
-func newMetricSystemCPUFrequencyNew(cfg MetricConfig) metricSystemCPUFrequencyNew {
-	m := metricSystemCPUFrequencyNew{config: cfg}
+func newMetricSystemCPUFrequency(cfg MetricConfig) metricSystemCPUFrequency {
+	m := metricSystemCPUFrequency{config: cfg}
 
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
@@ -81,12 +82,12 @@ func newMetricSystemCPUFrequencyNew(cfg MetricConfig) metricSystemCPUFrequencyNe
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user config.
 type MetricsBuilder struct {
-	config                      MetricsBuilderConfig // config of the metrics builder.
-	startTime                   pcommon.Timestamp    // start time that will be applied to all recorded data points.
-	metricsCapacity             int                  // maximum observed number of metrics per resource.
-	metricsBuffer               pmetric.Metrics      // accumulates metrics data before emitting.
-	buildInfo                   component.BuildInfo  // contains version information.
-	metricSystemCPUFrequencyNew metricSystemCPUFrequencyNew
+	config                   MetricsBuilderConfig // config of the metrics builder.
+	startTime                pcommon.Timestamp    // start time that will be applied to all recorded data points.
+	metricsCapacity          int                  // maximum observed number of metrics per resource.
+	metricsBuffer            pmetric.Metrics      // accumulates metrics data before emitting.
+	buildInfo                component.BuildInfo  // contains version information.
+	metricSystemCPUFrequency metricSystemCPUFrequency
 }
 
 // MetricBuilderOption applies changes to default metrics builder.
@@ -108,11 +109,11 @@ func WithStartTime(startTime pcommon.Timestamp) MetricBuilderOption {
 }
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, options ...MetricBuilderOption) *MetricsBuilder {
 	mb := &MetricsBuilder{
-		config:                      mbc,
-		startTime:                   pcommon.NewTimestampFromTime(time.Now()),
-		metricsBuffer:               pmetric.NewMetrics(),
-		buildInfo:                   settings.BuildInfo,
-		metricSystemCPUFrequencyNew: newMetricSystemCPUFrequencyNew(mbc.Metrics.SystemCPUFrequencyNew),
+		config:                   mbc,
+		startTime:                pcommon.NewTimestampFromTime(time.Now()),
+		metricsBuffer:            pmetric.NewMetrics(),
+		buildInfo:                settings.BuildInfo,
+		metricSystemCPUFrequency: newMetricSystemCPUFrequency(mbc.Metrics.SystemCPUFrequency),
 	}
 
 	for _, op := range options {
@@ -179,7 +180,7 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	ils.Scope().SetName(ScopeName)
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
-	mb.metricSystemCPUFrequencyNew.emit(ils.Metrics())
+	mb.metricSystemCPUFrequency.emit(ils.Metrics())
 
 	for _, op := range options {
 		op.apply(rm)
@@ -201,9 +202,9 @@ func (mb *MetricsBuilder) Emit(options ...ResourceMetricsOption) pmetric.Metrics
 	return metrics
 }
 
-// RecordSystemCPUFrequencyNewDataPoint adds a data point to system.cpu.frequency.new metric.
-func (mb *MetricsBuilder) RecordSystemCPUFrequencyNewDataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
-	mb.metricSystemCPUFrequencyNew.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue)
+// RecordSystemCPUFrequencyDataPoint adds a data point to system.cpu.frequency metric.
+func (mb *MetricsBuilder) RecordSystemCPUFrequencyDataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, testAttributeValue string) {
+	mb.metricSystemCPUFrequency.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, testAttributeValue)
 }
 
 // Reset resets metrics builder to its initial state. It should be used when external metrics source is restarted,

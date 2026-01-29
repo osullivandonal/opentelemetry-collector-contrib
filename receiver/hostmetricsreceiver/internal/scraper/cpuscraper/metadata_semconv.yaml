@@ -17,8 +17,12 @@ attributes:
     description: Logical CPU number starting at 0.
     type: string
 
+  test:
+    description: Test attribute
+    type: string
+
 metrics:
-  system.cpu.frequency.new:
+  system.cpu.frequency:
     enabled: true
     description: Current frequency of the CPU core in Hz, the new version.
     unit: "Hz"
@@ -26,5 +30,5 @@ metrics:
       level: development
     gauge:
       value_type: double
-    attributes: [cpu]
+    attributes: [cpu, test]
 

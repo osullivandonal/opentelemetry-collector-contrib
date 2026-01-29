@@ -28,12 +28,12 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsConfig provides config for cpu metrics.
 type MetricsConfig struct {
-	SystemCPUFrequencyNew MetricConfig `mapstructure:"system.cpu.frequency.new"`
+	SystemCPUFrequency MetricConfig `mapstructure:"system.cpu.frequency"`
 }
 
 func DefaultMetricsConfig() MetricsConfig {
 	return MetricsConfig{
-		SystemCPUFrequencyNew: MetricConfig{
+		SystemCPUFrequency: MetricConfig{
 			Enabled: true,
 		},
 	}
