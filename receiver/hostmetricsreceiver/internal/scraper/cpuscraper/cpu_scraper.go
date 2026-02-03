@@ -16,6 +16,7 @@ import (
 	"go.opentelemetry.io/collector/scraper"
 	"go.opentelemetry.io/collector/scraper/scrapererror"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/featuregates"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/internal/metadata"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/ucal"
 )
@@ -53,6 +54,16 @@ func (s *cpuScraper) start(ctx context.Context, _ component.Host) error {
 	if err != nil {
 		return err
 	}
+
+	if featuregates.EmitSemconvMetrics.IsEnabled() {
+		mbc := s.config.MetricsBuilderConfig
+		mbc.Metrics.SystemCPUTimeV2.Enabled = mbc.Metrics.SystemCPUTime.Enabled
+
+		mbc.Metrics.SystemCPUTime.Enabled = false
+		s.mb = metadata.NewMetricsBuilder(mbc, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
+		return nil
+	}
+
 	s.mb = metadata.NewMetricsBuilder(s.config.MetricsBuilderConfig, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
 	return nil
 }
@@ -64,12 +75,21 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 		return pmetric.NewMetrics(), scrapererror.NewPartialScrapeError(err, metricsLen)
 	}
 
-	for _, cpuTime := range cpuTimes {
-		s.recordCPUTimeStateDataPoints(now, cpuTime)
+	// Here is how we don't break the users config
+	// If the semconv feature gate is not enabled
+	// then we emit old legacy metrics
+	if !featuregates.EmitSemconvMetrics.IsEnabled() {
+		for _, cpuTime := range cpuTimes {
+			s.recordCPUTimeStateDataPoints(now, cpuTime)
+		}
 	}
 
-	for _, cpuTime := range cpuTimes {
-		s.recordCPUTimeV2StateDataPoints(now, cpuTime)
+	// If the semconv feature gate is avctive then we emit
+	// the new semconv metrics
+	if featuregates.EmitSemconvMetrics.IsEnabled() {
+		for _, cpuTime := range cpuTimes {
+			s.recordCPUTimeV2StateDataPoints(now, cpuTime)
+		}
 	}
 
 	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
