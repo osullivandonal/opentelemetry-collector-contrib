@@ -55,14 +55,14 @@ func (s *cpuScraper) start(ctx context.Context, _ component.Host) error {
 		return err
 	}
 
-	if featuregates.EmitSemconvMetrics.IsEnabled() {
-		mbc := s.config.MetricsBuilderConfig
-		mbc.Metrics.SystemCPUTimeV2.Enabled = mbc.Metrics.SystemCPUTime.Enabled
-
-		mbc.Metrics.SystemCPUTime.Enabled = false
-		s.mb = metadata.NewMetricsBuilder(mbc, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
-		return nil
-	}
+	// if featuregates.EmitSemconvMetrics.IsEnabled() {
+	// 	mbc := s.config.MetricsBuilderConfig
+	// 	mbc.Metrics.SystemCPUTimeV2.Enabled = mbc.Metrics.SystemCPUTime.Enabled
+	//
+	// 	mbc.Metrics.SystemCPUTime.Enabled = false
+	// 	s.mb = metadata.NewMetricsBuilder(mbc, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
+	// 	return nil
+	// }
 
 	s.mb = metadata.NewMetricsBuilder(s.config.MetricsBuilderConfig, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
 	return nil
