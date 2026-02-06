@@ -8,7 +8,7 @@ status:
   codeowners:
     active: [dmitryax, braydonk]
 
-sem_conv_version: 1.9.0
+sem_conv_version: 1.38.0
 
 attributes:
   state:
@@ -53,6 +53,10 @@ metrics:
       value_type: int
       aggregation_temporality: cumulative
       monotonic: false
+    semantic_convention:
+      ref: https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemmemorylimit
+      package: systemconv
+      type: MemoryLimit
 
   system.memory.linux.hugepages.limit:
     enabled: false

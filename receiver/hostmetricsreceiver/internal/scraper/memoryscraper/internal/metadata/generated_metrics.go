@@ -9,7 +9,8 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper"
-	conventions "go.opentelemetry.io/otel/semconv/v1.9.0"
+	conventions "go.opentelemetry.io/otel/semconv/v1.38.0"
+	systemconv "go.opentelemetry.io/otel/semconv/v1.38.0/systemconv"
 )
 
 // AttributeState specifies the value state attribute.
@@ -92,7 +93,7 @@ var MetricsInfo = metricsInfo{
 		Name: "system.linux.memory.dirty",
 	},
 	SystemMemoryLimit: metricInfo{
-		Name: "system.memory.limit",
+		Name: metricSemConvSystemMemoryLimit.Name(),
 	},
 	SystemMemoryLinuxHugepagesLimit: metricInfo{
 		Name: "system.memory.linux.hugepages.limit",
@@ -252,11 +253,14 @@ type metricSystemMemoryLimit struct {
 	capacity int            // max observed number of data points added to the metric.
 }
 
+// metricSemConvSystemMemoryLimit provides access to the semantic convention type
+var metricSemConvSystemMemoryLimit = systemconv.MemoryLimit{}
+
 // init fills system.memory.limit metric with initial data.
 func (m *metricSystemMemoryLimit) init() {
-	m.data.SetName("system.memory.limit")
-	m.data.SetDescription("Total bytes of memory available.")
-	m.data.SetUnit("By")
+	m.data.SetName(metricSemConvSystemMemoryLimit.Name())
+	m.data.SetDescription(metricSemConvSystemMemoryLimit.Description())
+	m.data.SetUnit(metricSemConvSystemMemoryLimit.Unit())
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(false)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)

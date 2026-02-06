@@ -150,7 +150,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["system.memory.limit"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total bytes of memory available.", ms.At(i).Description())
+					assert.Equal(t, metricSemConvSystemMemoryLimit.Description(), ms.At(i).Description())
 					assert.Equal(t, "By", ms.At(i).Unit())
 					assert.False(t, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

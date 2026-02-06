@@ -144,7 +144,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["system.cpu.time"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Total seconds each logical CPU spent on each mode.", ms.At(i).Description())
+					assert.Equal(t, metricSemConvSystemCPUTime.Description(), ms.At(i).Description())
 					assert.Equal(t, "s", ms.At(i).Unit())
 					assert.True(t, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

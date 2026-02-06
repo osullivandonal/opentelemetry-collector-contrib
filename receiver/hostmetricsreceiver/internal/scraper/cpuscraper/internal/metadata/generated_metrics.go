@@ -9,7 +9,8 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper"
-	conventions "go.opentelemetry.io/otel/semconv/v1.9.0"
+	conventions "go.opentelemetry.io/otel/semconv/v1.38.0"
+	systemconv "go.opentelemetry.io/otel/semconv/v1.38.0/systemconv"
 )
 
 // AttributeState specifies the value state attribute.
@@ -73,7 +74,7 @@ var MetricsInfo = metricsInfo{
 		Name: "system.cpu.physical.count",
 	},
 	SystemCPUTime: metricInfo{
-		Name: "system.cpu.time",
+		Name: metricSemConvSystemCPUTime.Name(),
 	},
 	SystemCPUUtilization: metricInfo{
 		Name: "system.cpu.utilization",
@@ -254,11 +255,14 @@ type metricSystemCPUTime struct {
 	capacity int            // max observed number of data points added to the metric.
 }
 
+// metricSemConvSystemCPUTime provides access to the semantic convention type
+var metricSemConvSystemCPUTime = systemconv.CPUTime{}
+
 // init fills system.cpu.time metric with initial data.
 func (m *metricSystemCPUTime) init() {
-	m.data.SetName("system.cpu.time")
-	m.data.SetDescription("Total seconds each logical CPU spent on each mode.")
-	m.data.SetUnit("s")
+	m.data.SetName(metricSemConvSystemCPUTime.Name())
+	m.data.SetDescription(metricSemConvSystemCPUTime.Description())
+	m.data.SetUnit(metricSemConvSystemCPUTime.Unit())
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(true)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)

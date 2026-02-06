@@ -629,8 +629,6 @@ go.opentelemetry.io/build-tools/multimod v0.29.0 h1:hVXibTuNuJumtn3cpzqPOX2xmcO+
 go.opentelemetry.io/build-tools/multimod v0.29.0/go.mod h1:tx762Z6RQe5Twkd04q1zzpmGQGtSljbKRy/P61EnJpo=
 go.opentelemetry.io/collector/cmd/builder v0.145.1-0.20260205185216-81bc641f26c0 h1:2UFqXVKErP041Jl+Yoj7YIWt+O6yOLsMi1GtLtS40LM=
 go.opentelemetry.io/collector/cmd/builder v0.145.1-0.20260205185216-81bc641f26c0/go.mod h1:JRN4XzcfREYd2VnZfCyADTI/rv+GeKZ3Yakj/xqaxI8=
-go.opentelemetry.io/collector/cmd/mdatagen v0.145.1-0.20260205185216-81bc641f26c0 h1:DJ6L99Qu/iQ8Mji4B9N3h4rGPUKIbq9Hp/5ViH8vLWo=
-go.opentelemetry.io/collector/cmd/mdatagen v0.145.1-0.20260205185216-81bc641f26c0/go.mod h1:H+StCde7Jkk9YHtslvvy+h3Z61RxnOl4YGw/5N98U9E=
 go.opentelemetry.io/collector/component v1.51.1-0.20260205185216-81bc641f26c0 h1:ZSlXxE90IY0Cl53RTqzyEgRgRPLTeTNBdGhaTmvj9eY=
 go.opentelemetry.io/collector/component v1.51.1-0.20260205185216-81bc641f26c0/go.mod h1:944C7vEIdk13Pn1fBbyaU8C1qKf2XC0jRBlc69NAsRY=
 go.opentelemetry.io/collector/confmap v1.51.1-0.20260205185216-81bc641f26c0 h1:SA1GIDv0iBsFMDVNevnHhTIPGANJG1Sl8lt5UtA8Og8=

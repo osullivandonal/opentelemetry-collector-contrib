@@ -56,9 +56,9 @@ The amount of dirty memory according to `/proc/meminfo`.
 
 Total bytes of memory available.
 
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
-| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| By | Sum | Int | Cumulative | false | Development |
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability | Semantic Convention |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- | ------------------- |
+| By | Sum | Int | Cumulative | false | Development | [system.memory.limit](https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemmemorylimit) |
 
 ### system.memory.linux.hugepages.limit
 

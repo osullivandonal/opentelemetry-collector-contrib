@@ -16,9 +16,9 @@ metrics:
 
 Total seconds each logical CPU spent on each mode.
 
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
-| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| s | Sum | Double | Cumulative | true | Development |
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability | Semantic Convention |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- | ------------------- |
+| s | Sum | Double | Cumulative | true | Development | [system.cpu.time](https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemcputime) |
 
 #### Attributes
 
