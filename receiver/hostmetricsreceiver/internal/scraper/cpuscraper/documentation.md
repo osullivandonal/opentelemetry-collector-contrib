@@ -14,7 +14,7 @@ metrics:
 
 ### system.cpu.time
 
-Total seconds each logical CPU spent on each mode.
+Seconds each logical CPU spent on each mode.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability | Semantic Convention |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- | ------------------- |

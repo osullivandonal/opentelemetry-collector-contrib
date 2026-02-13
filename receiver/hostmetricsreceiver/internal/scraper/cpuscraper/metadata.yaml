@@ -55,7 +55,7 @@ metrics:
 
   system.cpu.time:
     enabled: true
-    description: Total seconds each logical CPU spent on each mode.
+    description: Seconds each logical CPU spent on each mode.
     unit: s
     stability:
       level: development
@@ -66,8 +66,6 @@ metrics:
     attributes: [cpu, state]
     semantic_convention:
       ref: https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemcputime
-      package: systemconv
-      type: CPUTime
 
   system.cpu.utilization:
     enabled: false
