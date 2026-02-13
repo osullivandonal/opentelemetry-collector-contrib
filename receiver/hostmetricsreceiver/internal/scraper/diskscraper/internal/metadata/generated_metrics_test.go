@@ -113,7 +113,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["system.disk.io"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "Disk bytes transferred.", ms.At(i).Description())
+					assert.Equal(t, metricSemConvSystemDiskIo.Description(), ms.At(i).Description())
 					assert.Equal(t, "By", ms.At(i).Unit())
 					assert.True(t, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

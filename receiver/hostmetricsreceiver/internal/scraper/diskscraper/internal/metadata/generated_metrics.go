@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper"
 	conventions "go.opentelemetry.io/otel/semconv/v1.38.0"
+	systemconv "go.opentelemetry.io/otel/semconv/v1.38.0/systemconv"
 )
 
 // AttributeDirection specifies the value direction attribute.
@@ -40,7 +41,7 @@ var MapAttributeDirection = map[string]AttributeDirection{
 
 var MetricsInfo = metricsInfo{
 	SystemDiskIo: metricInfo{
-		Name: "system.disk.io",
+		Name: metricSemConvSystemDiskIo.Name(),
 	},
 	SystemDiskIoTime: metricInfo{
 		Name: "system.disk.io_time",
@@ -82,11 +83,14 @@ type metricSystemDiskIo struct {
 	capacity int            // max observed number of data points added to the metric.
 }
 
+// metricSemConvSystemDiskIo provides access to the semantic convention type
+var metricSemConvSystemDiskIo = systemconv.DiskIO{}
+
 // init fills system.disk.io metric with initial data.
 func (m *metricSystemDiskIo) init() {
-	m.data.SetName("system.disk.io")
-	m.data.SetDescription("Disk bytes transferred.")
-	m.data.SetUnit("By")
+	m.data.SetName(metricSemConvSystemDiskIo.Name())
+	m.data.SetDescription(metricSemConvSystemDiskIo.Description())
+	m.data.SetUnit(metricSemConvSystemDiskIo.Unit())
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(true)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
