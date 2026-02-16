@@ -199,7 +199,7 @@ func TestMetricsBuilder(t *testing.T) {
 					validatedMetrics["system.network.io"] = true
 					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
-					assert.Equal(t, "The number of bytes transmitted and received.", ms.At(i).Description())
+					assert.Equal(t, metricSemConvSystemNetworkIo.Description(), ms.At(i).Description())
 					assert.Equal(t, "By", ms.At(i).Unit())
 					assert.True(t, ms.At(i).Sum().IsMonotonic())
 					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())

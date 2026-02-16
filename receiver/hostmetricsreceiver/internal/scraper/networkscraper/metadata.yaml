@@ -80,6 +80,7 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [device, direction]
+
   system.network.io:
     enabled: true
     description: The number of bytes transmitted and received.
@@ -91,6 +92,9 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [device, direction]
+    semantic_convention:
+      ref: https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemnetworkio
+
   system.network.packets:
     enabled: true
     description: The number of packets transferred.

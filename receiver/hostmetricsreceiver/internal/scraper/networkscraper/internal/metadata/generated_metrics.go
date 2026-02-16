@@ -10,6 +10,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper"
 	conventions "go.opentelemetry.io/otel/semconv/v1.38.0"
+	systemconv "go.opentelemetry.io/otel/semconv/v1.38.0/systemconv"
 )
 
 // AttributeDirection specifies the value direction attribute.
@@ -77,7 +78,7 @@ var MetricsInfo = metricsInfo{
 		Name: "system.network.errors",
 	},
 	SystemNetworkIo: metricInfo{
-		Name: "system.network.io",
+		Name: metricSemConvSystemNetworkIo.Name(),
 	},
 	SystemNetworkPackets: metricInfo{
 		Name: "system.network.packets",
@@ -373,11 +374,14 @@ type metricSystemNetworkIo struct {
 	capacity int            // max observed number of data points added to the metric.
 }
 
+// metricSemConvSystemNetworkIo provides access to the semantic convention type
+var metricSemConvSystemNetworkIo = systemconv.NetworkIO{}
+
 // init fills system.network.io metric with initial data.
 func (m *metricSystemNetworkIo) init() {
-	m.data.SetName("system.network.io")
-	m.data.SetDescription("The number of bytes transmitted and received.")
-	m.data.SetUnit("By")
+	m.data.SetName(metricSemConvSystemNetworkIo.Name())
+	m.data.SetDescription(metricSemConvSystemNetworkIo.Description())
+	m.data.SetUnit(metricSemConvSystemNetworkIo.Unit())
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(true)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
