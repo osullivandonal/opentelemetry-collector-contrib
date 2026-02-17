@@ -110,6 +110,16 @@ for receiver_dir in $RECEIVERS; do
     # ---- Attributes list (4-space key, 6-space list items) ----
     in_metrics && /^    attributes:/ {
       if (/\[\]/) next        # attributes: [] — empty list
+      # Handle inline array format: attributes: ["interface", "direction"]
+      if (/\[.*\]/) {
+        inline = $0
+        sub(/^.*\[/, "", inline)      # remove everything up to [
+        sub(/\].*$/, "", inline)      # remove ] and everything after
+        gsub(/"/, "", inline)         # remove quotes
+        gsub(/, */, ", ", inline)     # normalize comma spacing
+        if (attrs == "") attrs = inline; else attrs = attrs ", " inline
+        next
+      }
       in_attrs = 1; next
     }
     in_attrs && /^      - / {
