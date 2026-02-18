@@ -412,3 +412,43 @@ func TestMetricsBuilder(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributeErrorTypeStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeErrorType(999).String())
+}
+
+func TestMapAttributeErrorType(t *testing.T) {
+	for str, val := range MapAttributeErrorType {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeNetworkIoDirectionStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeNetworkIoDirection(999).String())
+}
+
+func TestMapAttributeNetworkIoDirection(t *testing.T) {
+	for str, val := range MapAttributeNetworkIoDirection {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeNetworkTransportStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeNetworkTransport(999).String())
+}
+
+func TestMapAttributeNetworkTransport(t *testing.T) {
+	for str, val := range MapAttributeNetworkTransport {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeNfsServerRepcacheStatusStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeNfsServerRepcacheStatus(999).String())
+}
+
+func TestMapAttributeNfsServerRepcacheStatus(t *testing.T) {
+	for str, val := range MapAttributeNfsServerRepcacheStatus {
+		assert.Equal(t, str, val.String())
+	}
+}

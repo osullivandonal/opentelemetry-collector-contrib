@@ -124,3 +124,13 @@ func TestMetricsBuilder(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributeStatusStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeStatus(999).String())
+}
+
+func TestMapAttributeStatus(t *testing.T) {
+	for str, val := range MapAttributeStatus {
+		assert.Equal(t, str, val.String())
+	}
+}

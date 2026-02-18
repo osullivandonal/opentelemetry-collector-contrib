@@ -307,3 +307,23 @@ func TestMetricsBuilder(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributeStateStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeState(999).String())
+}
+
+func TestMapAttributeState(t *testing.T) {
+	for str, val := range MapAttributeState {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeSystemMemoryLinuxHugepagesStateStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeSystemMemoryLinuxHugepagesState(999).String())
+}
+
+func TestMapAttributeSystemMemoryLinuxHugepagesState(t *testing.T) {
+	for str, val := range MapAttributeSystemMemoryLinuxHugepagesState {
+		assert.Equal(t, str, val.String())
+	}
+}

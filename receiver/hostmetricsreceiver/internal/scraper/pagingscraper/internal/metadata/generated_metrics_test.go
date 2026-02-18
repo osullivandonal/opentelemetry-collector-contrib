@@ -175,3 +175,33 @@ func TestMetricsBuilder(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributeDirectionStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeDirection(999).String())
+}
+
+func TestMapAttributeDirection(t *testing.T) {
+	for str, val := range MapAttributeDirection {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeStateStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeState(999).String())
+}
+
+func TestMapAttributeState(t *testing.T) {
+	for str, val := range MapAttributeState {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeTypeStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeType(999).String())
+}
+
+func TestMapAttributeType(t *testing.T) {
+	for str, val := range MapAttributeType {
+		assert.Equal(t, str, val.String())
+	}
+}

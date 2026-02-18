@@ -357,3 +357,43 @@ func TestMetricsBuilder(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributeContextSwitchTypeStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeContextSwitchType(999).String())
+}
+
+func TestMapAttributeContextSwitchType(t *testing.T) {
+	for str, val := range MapAttributeContextSwitchType {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeDirectionStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeDirection(999).String())
+}
+
+func TestMapAttributeDirection(t *testing.T) {
+	for str, val := range MapAttributeDirection {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributePagingFaultTypeStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributePagingFaultType(999).String())
+}
+
+func TestMapAttributePagingFaultType(t *testing.T) {
+	for str, val := range MapAttributePagingFaultType {
+		assert.Equal(t, str, val.String())
+	}
+}
+
+func TestAttributeStateStringInvalid(t *testing.T) {
+	assert.Equal(t, "", AttributeState(999).String())
+}
+
+func TestMapAttributeState(t *testing.T) {
+	for str, val := range MapAttributeState {
+		assert.Equal(t, str, val.String())
+	}
+}
