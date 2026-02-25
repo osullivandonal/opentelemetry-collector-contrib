@@ -44,7 +44,7 @@ var MetricsInfo = metricsInfo{
 		Name: metricSemConvSystemDiskIo.Name(),
 	},
 	SystemDiskIoTime: metricInfo{
-		Name: "system.disk.io_time",
+		Name: metricSemConvSystemDiskIoTime.Name(),
 	},
 	SystemDiskMerged: metricInfo{
 		Name: "system.disk.merged",
@@ -141,11 +141,14 @@ type metricSystemDiskIoTime struct {
 	capacity int            // max observed number of data points added to the metric.
 }
 
+// metricSemConvSystemDiskIoTime provides access to the semantic convention type
+var metricSemConvSystemDiskIoTime = systemconv.DiskIOTime{}
+
 // init fills system.disk.io_time metric with initial data.
 func (m *metricSystemDiskIoTime) init() {
-	m.data.SetName("system.disk.io_time")
-	m.data.SetDescription("Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time.")
-	m.data.SetUnit("s")
+	m.data.SetName(metricSemConvSystemDiskIoTime.Name())
+	m.data.SetDescription(metricSemConvSystemDiskIoTime.Description())
+	m.data.SetUnit(metricSemConvSystemDiskIoTime.Unit())
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(true)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)

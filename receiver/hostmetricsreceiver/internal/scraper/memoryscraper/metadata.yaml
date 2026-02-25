@@ -52,8 +52,6 @@ metrics:
       monotonic: false
     semantic_convention:
       ref: https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemmemorylimit
-      package: systemconv
-      type: MemoryLimit
 
   system.memory.linux.hugepages.limit:
     enabled: false

@@ -31,9 +31,9 @@ Disk bytes transferred.
 
 Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time.
 
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
-| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| s | Sum | Double | Cumulative | true | Development |
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability | Semantic Convention |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- | ------------------- |
+| s | Sum | Double | Cumulative | true | Development | [system.disk.io_time](https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemdiskio_time) |
 
 #### Attributes
 

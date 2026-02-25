@@ -44,8 +44,8 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [device]
-    # semantic_convention:
-    #   ref: https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemdiskio_time
+    semantic_convention:
+      ref: https://github.com/open-telemetry/semantic-conventions/blob/v1.38.0/docs/system/system-metrics.md#metric-systemdiskio_time
 
   system.disk.merged:
     enabled: true
