@@ -12,7 +12,7 @@ metrics:
     enabled: false
 ```
 
-### system.cpu.time
+### [system.cpu.time](https://github.com/open-telemetry/semantic-conventions/blob/v1.9.0/docs/system/system-metrics.md#metric-systemcputime)
 
 Total seconds each logical CPU spent on each mode.
 
@@ -25,7 +25,7 @@ Total seconds each logical CPU spent on each mode.
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended |
-| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
+| [state](https://github.com/open-telemetry/semantic-conventions/blob/v1.9.0/docs/registry/attributes/system.md#system-memory-state) | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
 
 ## Optional Metrics
 
@@ -80,4 +80,4 @@ Difference in system.cpu.time since the last measurement per logical CPU, divide
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended |
-| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
+| [state](https://github.com/open-telemetry/semantic-conventions/blob/v1.9.0/docs/registry/attributes/system.md#system-memory-state) | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |

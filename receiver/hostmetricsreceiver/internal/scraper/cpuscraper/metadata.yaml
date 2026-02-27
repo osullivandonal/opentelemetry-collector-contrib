@@ -19,6 +19,8 @@ attributes:
     description: Breakdown of CPU usage by type.
     type: string
     enum: [idle, interrupt, nice, softirq, steal, system, user, wait]
+    semantic_convention:
+      ref: system.md#system-memory-state
 
 metrics:
   system.cpu.frequency:
@@ -60,6 +62,8 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [cpu, state]
+    semantic_convention:
+      ref: system/system-metrics.md#metric-systemcputime
 
   system.cpu.utilization:
     enabled: false
