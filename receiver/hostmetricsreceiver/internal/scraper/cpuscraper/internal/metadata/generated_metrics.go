@@ -324,7 +324,7 @@ func (m *metricSystemCPUTimeV2) init() {
 	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricSystemCPUTimeV2) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue string) {
+func (m *metricSystemCPUTimeV2) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -333,7 +333,6 @@ func (m *metricSystemCPUTimeV2) recordDataPoint(start pcommon.Timestamp, ts pcom
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("cpu", cpuAttributeValue)
-	dp.Attributes().PutStr("state", stateAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -577,8 +576,8 @@ func (mb *MetricsBuilder) RecordSystemCPUTimeDataPoint(ts pcommon.Timestamp, val
 }
 
 // RecordSystemCPUTimeV2DataPoint adds a data point to system.cpu.time/v2 metric.
-func (mb *MetricsBuilder) RecordSystemCPUTimeV2DataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue AttributeState) {
-	mb.metricSystemCPUTimeV2.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
+func (mb *MetricsBuilder) RecordSystemCPUTimeV2DataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
+	mb.metricSystemCPUTimeV2.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue)
 }
 
 // RecordSystemCPUUtilizationDataPoint adds a data point to system.cpu.utilization metric.

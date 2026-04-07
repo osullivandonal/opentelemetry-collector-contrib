@@ -10,6 +10,14 @@ status:
 
 sem_conv_version: 1.9.0
 
+feature_gates:
+  - id: receiver.hostmetrics.EmitV1SemanticConventionsstage
+    stage: alpha
+    description: >-
+      When enabled, V1 Semantic Conventions are emmitted
+    from_version: v0.145.0
+    reference_url: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592
+
 attributes:
   cpu:
     description: Logical CPU number starting at 0.
@@ -80,7 +88,7 @@ metrics:
       value_type: double
       monotonic: true
       aggregation_temporality: cumulative
-    attributes: [cpu, state]
+    attributes: [cpu]
 
   system.cpu.utilization:
     enabled: false

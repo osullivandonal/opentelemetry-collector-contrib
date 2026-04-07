@@ -57,67 +57,51 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount := 0
 			allMetricsCount := 0
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientNetCountDataPoint(ts, 1, AttributeNetworkTransportUdp)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientNetTCPConnectionAcceptedDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientOperationCountDataPoint(ts, 1, 15, "nfs.operation.name-val")
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientProcedureCountDataPoint(ts, 1, 15, "onc_rpc.procedure.name-val")
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientRPCAuthrefreshCountDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientRPCCountDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientRPCRetransmitCountDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerFhStaleCountDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerIoDataPoint(ts, 1, AttributeNetworkIoDirectionTransmit)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerNetCountDataPoint(ts, 1, AttributeNetworkTransportUdp)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerNetTCPConnectionAcceptedDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerOperationCountDataPoint(ts, 1, 15, "nfs.operation.name-val")
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerProcedureCountDataPoint(ts, 1, 15, "onc_rpc.procedure.name-val")
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerRepcacheRequestsDataPoint(ts, 1, AttributeNfsServerRepcacheStatusHit)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerRPCCountDataPoint(ts, 1, AttributeErrorTypeFormat)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerThreadCountDataPoint(ts, 1)

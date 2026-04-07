@@ -16,7 +16,6 @@ import (
 	"go.opentelemetry.io/collector/scraper"
 	"go.opentelemetry.io/collector/scraper/scrapererror"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/featuregates"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/internal/metadata"
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/hostmetricsreceiver/internal/scraper/cpuscraper/ucal"
 )
@@ -78,19 +77,25 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 	// Here is how we don't break the users config
 	// If the semconv feature gate is not enabled
 	// then we emit old legacy metrics
-	if !featuregates.EmitSemconvMetrics.IsEnabled() {
+	for _, cpuTime := range cpuTimes {
+		s.recordCPUTimeStateDataPoints(now, cpuTime)
+	}
+	// if featuregates.EmitSemconvMetrics.IsEnabled() {
+	// }
+
+	if metadata.ReceiverHostmetricsEmitV1SemanticConventionsstageFeatureGate.IsEnabled() {
 		for _, cpuTime := range cpuTimes {
-			s.recordCPUTimeStateDataPoints(now, cpuTime)
+			s.recordCPUTimeV2StateDataPoints(now, cpuTime)
 		}
 	}
 
 	// If the semconv feature gate is avctive then we emit
 	// the new semconv metrics
-	if featuregates.EmitSemconvMetrics.IsEnabled() {
-		for _, cpuTime := range cpuTimes {
-			s.recordCPUTimeV2StateDataPoints(now, cpuTime)
-		}
-	}
+	// if featuregates.EmitSemconvMetrics.IsEnabled() {
+	// 	for _, cpuTime := range cpuTimes {
+	// 		s.recordCPUTimeV2StateDataPoints(now, cpuTime)
+	// 	}
+	// }
 
 	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
 	if err != nil {

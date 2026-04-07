@@ -28,6 +28,22 @@ CPU time in seconds (legacy format)
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended |
 | state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
 
+
+### system.cpu.time
+Configuration key: `system.cpu.time/v2`
+
+CPU time in seconds (new semantic conventions)
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| s | Sum | Double | Cumulative | true | Beta |
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level |
+| ---- | ----------- | ------ | -------- |
+| cpu | Logical CPU number starting at 0. | Any Str | Recommended |
+
 ## Optional Metrics
 
 The following metrics are not emitted by default. Each of them can be enabled by applying the following configuration:
@@ -72,23 +88,6 @@ Number of available physical CPUs.
 | {cpu} | Sum | Int | Cumulative | false | Development |
 
 
-### system.cpu.time
-Configuration key: `system.cpu.time/v2`
-
-CPU time in seconds (new semantic conventions)
-
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
-| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| s | Sum | Double | Cumulative | true | Beta |
-
-#### Attributes
-
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| cpu | Logical CPU number starting at 0. | Any Str | Recommended |
-| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
-
-
 ### system.cpu.utilization
 
 Difference in system.cpu.time since the last measurement per logical CPU, divided by the elapsed time (value in interval [0,1]).
@@ -103,3 +102,13 @@ Difference in system.cpu.time since the last measurement per logical CPU, divide
 | ---- | ----------- | ------ | -------- |
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended |
 | state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
+
+## Feature Gates
+
+This component has the following feature gates:
+
+| Feature Gate | Stage | Description | From Version | To Version | Reference |
+| ------------ | ----- | ----------- | ------------ | ---------- | --------- |
+| `receiver.hostmetrics.EmitV1SemanticConventionsstage` | alpha | When enabled, V1 Semantic Conventions are emmitted | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
+
+For more information about feature gates, see the [Feature Gates](https://github.com/open-telemetry/opentelemetry-collector/blob/main/featuregate/README.md) documentation.

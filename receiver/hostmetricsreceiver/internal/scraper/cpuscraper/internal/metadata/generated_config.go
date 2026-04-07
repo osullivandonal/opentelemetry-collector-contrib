@@ -51,7 +51,7 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled: true,
 		},
 		SystemCPUTimeV2: MetricConfig{
-			Enabled: false,
+			Enabled: true,
 		},
 		SystemCPUUtilization: MetricConfig{
 			Enabled: false,

@@ -57,11 +57,9 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount := 0
 			allMetricsCount := 0
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemProcessesCountDataPoint(ts, 1, AttributeStatusBlocked)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemProcessesCreatedDataPoint(ts, 1)

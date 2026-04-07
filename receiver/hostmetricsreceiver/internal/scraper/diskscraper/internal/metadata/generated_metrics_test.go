@@ -57,31 +57,24 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount := 0
 			allMetricsCount := 0
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskIoDataPoint(ts, 1, "device-val", AttributeDirectionRead)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskIoTimeDataPoint(ts, 1, "device-val")
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskMergedDataPoint(ts, 1, "device-val", AttributeDirectionRead)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskOperationTimeDataPoint(ts, 1, "device-val", AttributeDirectionRead)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskOperationsDataPoint(ts, 1, "device-val", AttributeDirectionRead)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskPendingOperationsDataPoint(ts, 1, "device-val")
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskWeightedIoTimeDataPoint(ts, 1, "device-val")

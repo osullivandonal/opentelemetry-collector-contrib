@@ -69,14 +69,12 @@ func TestMetricsBuilder(t *testing.T) {
 
 			allMetricsCount++
 			mb.RecordProcessContextSwitchesDataPoint(ts, 1, AttributeContextSwitchTypeInvoluntary)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeStateSystem)
 
 			allMetricsCount++
 			mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeStateSystem)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordProcessDiskIoDataPoint(ts, 1, AttributeDirectionRead)
@@ -86,14 +84,12 @@ func TestMetricsBuilder(t *testing.T) {
 
 			allMetricsCount++
 			mb.RecordProcessHandlesDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordProcessMemoryUsageDataPoint(ts, 1)
 
 			allMetricsCount++
 			mb.RecordProcessMemoryUtilizationDataPoint(ts, 1)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordProcessMemoryVirtualDataPoint(ts, 1)

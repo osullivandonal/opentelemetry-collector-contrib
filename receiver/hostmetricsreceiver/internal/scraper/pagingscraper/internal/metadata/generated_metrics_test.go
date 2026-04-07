@@ -57,15 +57,12 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount := 0
 			allMetricsCount := 0
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemPagingFaultsDataPoint(ts, 1, AttributeTypeMajor)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemPagingOperationsDataPoint(ts, 1, AttributeDirectionPageIn, AttributeTypeMajor)
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemPagingUsageDataPoint(ts, 1, "device-val", AttributeStateCached)
