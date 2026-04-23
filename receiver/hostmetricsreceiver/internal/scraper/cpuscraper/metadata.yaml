@@ -80,15 +80,15 @@ metrics:
   system.cpu.time/v1:
     name: system.cpu.time   # Same emitted metric name
     enabled: true
-    description: CPU time in seconds (new semantic conventions)
+    description: CPU time in milliseconds (new semantic conventions)
     stability:
       level: beta
-    unit: s
+    unit: ms
     sum:
       value_type: double
       monotonic: true
       aggregation_temporality: cumulative
-    attributes: [cpu]
+    attributes: [cpu, state]
 
   system.cpu.utilization:
     enabled: false

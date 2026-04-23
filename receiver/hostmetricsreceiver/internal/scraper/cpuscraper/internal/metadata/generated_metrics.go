@@ -316,15 +316,15 @@ type metricSystemCPUTimeV1 struct {
 // init fills system.cpu.time/v1 metric with initial data.
 func (m *metricSystemCPUTimeV1) init() {
 	m.data.SetName("system.cpu.time")
-	m.data.SetDescription("CPU time in seconds (new semantic conventions)")
-	m.data.SetUnit("s")
+	m.data.SetDescription("CPU time in milliseconds (new semantic conventions)")
+	m.data.SetUnit("ms")
 	m.data.SetEmptySum()
 	m.data.Sum().SetIsMonotonic(true)
 	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
+func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -333,6 +333,7 @@ func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcom
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("cpu", cpuAttributeValue)
+	dp.Attributes().PutStr("state", stateAttributeValue)
 }
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
@@ -576,8 +577,8 @@ func (mb *MetricsBuilder) RecordSystemCPUTimeDataPoint(ts pcommon.Timestamp, val
 }
 
 // RecordSystemCPUTimeV1DataPoint adds a data point to system.cpu.time/v1 metric.
-func (mb *MetricsBuilder) RecordSystemCPUTimeV1DataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
-	mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue)
+func (mb *MetricsBuilder) RecordSystemCPUTimeV1DataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue AttributeState) {
+	mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
 }
 
 // RecordSystemCPUUtilizationDataPoint adds a data point to system.cpu.utilization metric.

@@ -32,17 +32,18 @@ CPU time in seconds (legacy format)
 ### system.cpu.time
 Configuration key: `system.cpu.time/v1`
 
-CPU time in seconds (new semantic conventions)
+CPU time in milliseconds (new semantic conventions)
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| s | Sum | Double | Cumulative | true | Beta |
+| ms | Sum | Double | Cumulative | true | Beta |
 
 #### Attributes
 
 | Name | Description | Values | Requirement Level |
 | ---- | ----------- | ------ | -------- |
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended |
+| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
 
 ## Optional Metrics
 
