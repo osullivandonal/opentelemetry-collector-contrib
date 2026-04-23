@@ -74,10 +74,10 @@ metrics:
       aggregation_temporality: cumulative
     attributes: [cpu, state]
     warnings:
-      if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.time/v2 instead.
+      if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.
 
   # New semconv metric - disabled by default, users opt-in
-  system.cpu.time/v2:
+  system.cpu.time/v1:
     name: system.cpu.time   # Same emitted metric name
     enabled: true
     description: CPU time in seconds (new semantic conventions)

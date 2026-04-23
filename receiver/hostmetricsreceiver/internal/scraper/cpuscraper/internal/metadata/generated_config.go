@@ -32,7 +32,7 @@ type MetricsConfig struct {
 	SystemCPULogicalCount  MetricConfig `mapstructure:"system.cpu.logical.count"`
 	SystemCPUPhysicalCount MetricConfig `mapstructure:"system.cpu.physical.count"`
 	SystemCPUTime          MetricConfig `mapstructure:"system.cpu.time"`
-	SystemCPUTimeV2        MetricConfig `mapstructure:"system.cpu.time/v2"`
+	SystemCPUTimeV1        MetricConfig `mapstructure:"system.cpu.time/v1"`
 	SystemCPUUtilization   MetricConfig `mapstructure:"system.cpu.utilization"`
 }
 
@@ -50,7 +50,7 @@ func DefaultMetricsConfig() MetricsConfig {
 		SystemCPUTime: MetricConfig{
 			Enabled: true,
 		},
-		SystemCPUTimeV2: MetricConfig{
+		SystemCPUTimeV1: MetricConfig{
 			Enabled: true,
 		},
 		SystemCPUUtilization: MetricConfig{

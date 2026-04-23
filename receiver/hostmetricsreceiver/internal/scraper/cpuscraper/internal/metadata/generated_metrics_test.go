@@ -54,7 +54,7 @@ func TestMetricsBuilder(t *testing.T) {
 
 			expectedWarnings := 0
 			if tt.metricsSet == testDataSetDefault {
-				assert.Equal(t, "[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time/v2 instead.", observedLogs.All()[expectedWarnings].Message)
+				assert.Equal(t, "[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.", observedLogs.All()[expectedWarnings].Message)
 				expectedWarnings++
 			}
 			assert.Equal(t, expectedWarnings, observedLogs.Len())

@@ -30,7 +30,7 @@ CPU time in seconds (legacy format)
 
 
 ### system.cpu.time
-Configuration key: `system.cpu.time/v2`
+Configuration key: `system.cpu.time/v1`
 
 CPU time in seconds (new semantic conventions)
 

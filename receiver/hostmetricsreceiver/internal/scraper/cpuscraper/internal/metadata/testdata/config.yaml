@@ -9,7 +9,7 @@ all_set:
       enabled: true
     system.cpu.time:
       enabled: true
-    system.cpu.time/v2:
+    system.cpu.time/v1:
       enabled: true
     system.cpu.utilization:
       enabled: true
@@ -23,7 +23,7 @@ none_set:
       enabled: false
     system.cpu.time:
       enabled: false
-    system.cpu.time/v2:
+    system.cpu.time/v1:
       enabled: false
     system.cpu.utilization:
       enabled: false

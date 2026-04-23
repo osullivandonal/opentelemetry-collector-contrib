@@ -54,15 +54,6 @@ func (s *cpuScraper) start(ctx context.Context, _ component.Host) error {
 		return err
 	}
 
-	// if featuregates.EmitSemconvMetrics.IsEnabled() {
-	// 	mbc := s.config.MetricsBuilderConfig
-	// 	mbc.Metrics.SystemCPUTimeV2.Enabled = mbc.Metrics.SystemCPUTime.Enabled
-	//
-	// 	mbc.Metrics.SystemCPUTime.Enabled = false
-	// 	s.mb = metadata.NewMetricsBuilder(mbc, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
-	// 	return nil
-	// }
-
 	s.mb = metadata.NewMetricsBuilder(s.config.MetricsBuilderConfig, s.settings, metadata.WithStartTime(pcommon.Timestamp(bootTime*1e9)))
 	return nil
 }
@@ -80,22 +71,13 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 	for _, cpuTime := range cpuTimes {
 		s.recordCPUTimeStateDataPoints(now, cpuTime)
 	}
-	// if featuregates.EmitSemconvMetrics.IsEnabled() {
-	// }
 
+	// If the v1 feature gate is active then we emit the new semconv metric
 	if metadata.ReceiverHostmetricsEmitV1SemanticConventionsstageFeatureGate.IsEnabled() {
 		for _, cpuTime := range cpuTimes {
-			s.recordCPUTimeV2StateDataPoints(now, cpuTime)
+			s.recordCPUTimeV1StateDataPoints(now, cpuTime)
 		}
 	}
-
-	// If the semconv feature gate is avctive then we emit
-	// the new semconv metrics
-	// if featuregates.EmitSemconvMetrics.IsEnabled() {
-	// 	for _, cpuTime := range cpuTimes {
-	// 		s.recordCPUTimeV2StateDataPoints(now, cpuTime)
-	// 	}
-	// }
 
 	err = s.ucal.CalculateAndRecord(now, cpuTimes, s.recordCPUUtilization)
 	if err != nil {
