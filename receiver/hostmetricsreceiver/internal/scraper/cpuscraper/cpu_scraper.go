@@ -73,7 +73,7 @@ func (s *cpuScraper) scrape(ctx context.Context) (pmetric.Metrics, error) {
 	}
 
 	// If the v1 feature gate is active then we emit the new semconv metric
-	if metadata.ReceiverHostmetricsEmitV1SemanticConventionsstageFeatureGate.IsEnabled() {
+	if metadata.ReceiverHostmetricsEmitV1SemanticConventionsFeatureGate.IsEnabled() {
 		for _, cpuTime := range cpuTimes {
 			s.recordCPUTimeV1StateDataPoints(now, cpuTime)
 		}

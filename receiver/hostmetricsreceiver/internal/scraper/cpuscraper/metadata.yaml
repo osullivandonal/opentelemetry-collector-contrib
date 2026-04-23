@@ -11,10 +11,10 @@ status:
 sem_conv_version: 1.9.0
 
 feature_gates:
-  - id: receiver.hostmetrics.EmitV1SemanticConventionsstage
+  - id: receiver.hostmetrics.EmitV1SemanticConventions
     stage: alpha
     description: >-
-      When enabled, V1 Semantic Conventions are emmitted
+      When enabled, V1 Semantic Conventions are emitted
     from_version: v0.145.0
     reference_url: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592
 

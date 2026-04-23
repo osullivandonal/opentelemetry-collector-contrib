@@ -110,6 +110,6 @@ This component has the following feature gates:
 
 | Feature Gate | Stage | Description | From Version | To Version | Reference |
 | ------------ | ----- | ----------- | ------------ | ---------- | --------- |
-| `receiver.hostmetrics.EmitV1SemanticConventionsstage` | alpha | When enabled, V1 Semantic Conventions are emmitted | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
+| `receiver.hostmetrics.EmitV1SemanticConventions` | alpha | When enabled, V1 Semantic Conventions are emitted | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
 
 For more information about feature gates, see the [Feature Gates](https://github.com/open-telemetry/opentelemetry-collector/blob/main/featuregate/README.md) documentation.

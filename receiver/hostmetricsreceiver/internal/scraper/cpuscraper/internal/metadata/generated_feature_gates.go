@@ -6,10 +6,10 @@ import (
 	"go.opentelemetry.io/collector/featuregate"
 )
 
-var ReceiverHostmetricsEmitV1SemanticConventionsstageFeatureGate = featuregate.GlobalRegistry().MustRegister(
-	"receiver.hostmetrics.EmitV1SemanticConventionsstage",
+var ReceiverHostmetricsEmitV1SemanticConventionsFeatureGate = featuregate.GlobalRegistry().MustRegister(
+	"receiver.hostmetrics.EmitV1SemanticConventions",
 	featuregate.StageAlpha,
-	featuregate.WithRegisterDescription("When enabled, V1 Semantic Conventions are emmitted"),
+	featuregate.WithRegisterDescription("When enabled, V1 Semantic Conventions are emitted"),
 	featuregate.WithRegisterReferenceURL("https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592"),
 	featuregate.WithRegisterFromVersion("v0.145.0"),
 )
