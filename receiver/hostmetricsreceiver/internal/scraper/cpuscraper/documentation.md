@@ -40,10 +40,10 @@ CPU time in milliseconds (new semantic conventions)
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| cpu | Logical CPU number starting at 0. | Any Str | Recommended |
-| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| cpu | Logical CPU number starting at 0. | Any Str | Recommended | - |
+| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended | - |
 
 ## Optional Metrics
 
@@ -66,9 +66,9 @@ Current frequency of the CPU core in Hz.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| cpu | Logical CPU number starting at 0. | Any Str | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| cpu | Logical CPU number starting at 0. | Any Str | Recommended | - |
 
 
 ### system.cpu.logical.count
@@ -99,17 +99,7 @@ Difference in system.cpu.time since the last measurement per logical CPU, divide
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| cpu | Logical CPU number starting at 0. | Any Str | Recommended |
-| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended |
-
-## Feature Gates
-
-This component has the following feature gates:
-
-| Feature Gate | Stage | Description | From Version | To Version | Reference |
-| ------------ | ----- | ----------- | ------------ | ---------- | --------- |
-| `receiver.hostmetrics.EmitV1SemanticConventions` | alpha | When enabled, V1 Semantic Conventions are emitted | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
-
-For more information about feature gates, see the [Feature Gates](https://github.com/open-telemetry/opentelemetry-collector/blob/main/featuregate/README.md) documentation.
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| cpu | Logical CPU number starting at 0. | Any Str | Recommended | - |
+| state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended | - |

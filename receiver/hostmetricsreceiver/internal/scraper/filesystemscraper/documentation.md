@@ -23,13 +23,13 @@ FileSystem inodes used.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| device | Identifier of the filesystem. | Any Str | Recommended |
-| mode | Mountpoint mode such "ro", "rw", etc. | Any Str | Recommended |
-| mountpoint | Mountpoint path. | Any Str | Recommended |
-| type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended |
-| state | Breakdown of filesystem usage by type. | Str: ``free``, ``reserved``, ``used`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| device | Identifier of the filesystem. | Any Str | Recommended | - |
+| mode | Mountpoint mode such "ro", "rw", etc. | Any Str | Recommended | - |
+| mountpoint | Mountpoint path. | Any Str | Recommended | - |
+| type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended | - |
+| state | Breakdown of filesystem usage by type. | Str: ``free``, ``reserved``, ``used`` | Recommended | - |
 
 
 ### system.filesystem.usage
@@ -42,13 +42,13 @@ Filesystem bytes used.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| device | Identifier of the filesystem. | Any Str | Recommended |
-| mode | Mountpoint mode such "ro", "rw", etc. | Any Str | Recommended |
-| mountpoint | Mountpoint path. | Any Str | Recommended |
-| type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended |
-| state | Breakdown of filesystem usage by type. | Str: ``free``, ``reserved``, ``used`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| device | Identifier of the filesystem. | Any Str | Recommended | - |
+| mode | Mountpoint mode such "ro", "rw", etc. | Any Str | Recommended | - |
+| mountpoint | Mountpoint path. | Any Str | Recommended | - |
+| type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended | - |
+| state | Breakdown of filesystem usage by type. | Str: ``free``, ``reserved``, ``used`` | Recommended | - |
 
 ## Optional Metrics
 
@@ -71,9 +71,9 @@ Fraction of filesystem bytes used.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| device | Identifier of the filesystem. | Any Str | Recommended |
-| mode | Mountpoint mode such "ro", "rw", etc. | Any Str | Recommended |
-| mountpoint | Mountpoint path. | Any Str | Recommended |
-| type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| device | Identifier of the filesystem. | Any Str | Recommended | - |
+| mode | Mountpoint mode such "ro", "rw", etc. | Any Str | Recommended | - |
+| mountpoint | Mountpoint path. | Any Str | Recommended | - |
+| type | Filesystem type, such as, "ext4", "tmpfs", etc. | Any Str | Recommended | - |

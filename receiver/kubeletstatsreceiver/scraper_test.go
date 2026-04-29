@@ -28,6 +28,12 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/receiver/kubeletstatsreceiver/internal/metadata"
 )
 
+func init() {
+	// Disable WatchListClient feature gate for tests as fake clientset doesn't support bookmark events
+	// See: https://github.com/kubernetes/kubernetes/issues/129408
+	os.Setenv("KUBE_FEATURE_WatchListClient", "false")
+}
+
 const (
 	dataLen = numContainers*containerMetrics + numPods*podMetrics + numNodes*nodeMetrics + numVolumes*volumeMetrics
 
@@ -59,7 +65,7 @@ func TestScraper(t *testing.T) {
 		&fakeRestClient{},
 		receivertest.NewNopSettings(metadata.Type),
 		options,
-		metadata.DefaultMetricsBuilderConfig(),
+		metadata.NewDefaultMetricsBuilderConfig(),
 		"worker-42",
 	)
 	require.NoError(t, err)
@@ -94,7 +100,7 @@ func TestScraperWithInterfacesMetrics(t *testing.T) {
 		&fakeRestClient{},
 		receivertest.NewNopSettings(metadata.Type),
 		options,
-		metadata.DefaultMetricsBuilderConfig(),
+		metadata.NewDefaultMetricsBuilderConfig(),
 		"worker-42",
 	)
 	require.NoError(t, err)
@@ -317,7 +323,7 @@ func TestScraperWithMetadata(t *testing.T) {
 				&fakeRestClient{},
 				receivertest.NewNopSettings(metadata.Type),
 				options,
-				metadata.DefaultMetricsBuilderConfig(),
+				metadata.NewDefaultMetricsBuilderConfig(),
 				"worker-42",
 			)
 			require.NoError(t, err)
@@ -582,7 +588,7 @@ func TestScraperWithMetricGroups(t *testing.T) {
 					extraMetadataLabels:   []kubelet.MetadataLabel{kubelet.MetadataLabelContainerID},
 					metricGroupsToCollect: test.metricGroups,
 				},
-				metadata.DefaultMetricsBuilderConfig(),
+				metadata.NewDefaultMetricsBuilderConfig(),
 				"worker-42",
 			)
 			require.NoError(t, err)
@@ -737,6 +743,14 @@ func TestScraperWithPVCDetailedLabels(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			mbc := metadata.NewDefaultMetricsBuilderConfig()
+			mbc.ResourceAttributes.AwsVolumeID.Enabled = true
+			mbc.ResourceAttributes.FsType.Enabled = true
+			mbc.ResourceAttributes.GcePdName.Enabled = true
+			mbc.ResourceAttributes.GlusterfsEndpointsName.Enabled = true
+			mbc.ResourceAttributes.GlusterfsPath.Enabled = true
+			mbc.ResourceAttributes.Partition.Enabled = true
+
 			r, err := newKubeletScraper(
 				&fakeRestClient{},
 				receivertest.NewNopSettings(metadata.Type),
@@ -747,7 +761,7 @@ func TestScraperWithPVCDetailedLabels(t *testing.T) {
 					},
 					k8sAPIClient: test.k8sAPIClient,
 				},
-				metadata.DefaultMetricsBuilderConfig(),
+				mbc,
 				"worker-42",
 			)
 			require.NoError(t, err)
@@ -832,7 +846,7 @@ func TestClientErrors(t *testing.T) {
 				},
 				settings,
 				options,
-				metadata.DefaultMetricsBuilderConfig(),
+				metadata.NewDefaultMetricsBuilderConfig(),
 				"",
 			)
 			require.NoError(t, err)

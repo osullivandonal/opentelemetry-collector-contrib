@@ -23,9 +23,9 @@ The number of page faults.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| type | Type of fault. | Str: ``major``, ``minor`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| type | Type of fault. | Str: ``major``, ``minor`` | Recommended | - |
 
 
 ### system.paging.operations
@@ -38,10 +38,10 @@ The number of paging operations.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| direction | Page In or Page Out. | Str: ``page_in``, ``page_out`` | Recommended |
-| type | Type of fault. | Str: ``major``, ``minor`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| direction | Page In or Page Out. | Str: ``page_in``, ``page_out`` | Recommended | - |
+| type | Type of fault. | Str: ``major``, ``minor`` | Recommended | - |
 
 
 ### system.paging.usage
@@ -54,10 +54,10 @@ Swap (unix) or pagefile (windows) usage.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| device | Name of the page file. | Any Str | Recommended |
-| state | Breakdown of paging usage by type. | Str: ``cached``, ``free``, ``used`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| device | Name of the page file. | Any Str | Recommended | - |
+| state | Breakdown of paging usage by type. | Str: ``cached``, ``free``, ``used`` | Recommended | - |
 
 ## Optional Metrics
 
@@ -80,7 +80,7 @@ Swap (unix) or pagefile (windows) utilization.
 
 #### Attributes
 
-| Name | Description | Values | Requirement Level |
-| ---- | ----------- | ------ | -------- |
-| device | Name of the page file. | Any Str | Recommended |
-| state | Breakdown of paging usage by type. | Str: ``cached``, ``free``, ``used`` | Recommended |
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| device | Name of the page file. | Any Str | Recommended | - |
+| state | Breakdown of paging usage by type. | Str: ``cached``, ``free``, ``used`` | Recommended | - |

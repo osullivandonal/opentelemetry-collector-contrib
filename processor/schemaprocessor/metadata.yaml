@@ -1,3 +1,4 @@
+display_name: Schema Processor
 type: schema
 
 status:
@@ -6,7 +7,7 @@ status:
     development: [traces, metrics, logs]
   distributions: []
   codeowners:
-    active: [MovieStoreGuy, ankitpatel96, dineshg13]
+    active: [MovieStoreGuy, ankitpatel96, dineshg13, MikeGoldsmith]
 
 tests:
   config:
