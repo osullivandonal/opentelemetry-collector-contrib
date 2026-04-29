@@ -431,7 +431,7 @@ func assertDatapointValueAndStringAttributes(t *testing.T, dp pmetric.NumberData
 func assertCPUMetricValid(t *testing.T, metric pmetric.Metric, startTime pcommon.Timestamp) {
 	expected := pmetric.NewMetric()
 	expected.SetName("system.cpu.time")
-	expected.SetDescription("CPU time in seconds (legacy format)")
+	expected.SetDescription("Total seconds each logical CPU spent on each mode.")
 	expected.SetUnit("s")
 	expected.SetEmptySum()
 	internal.AssertDescriptorEqual(t, expected, metric)

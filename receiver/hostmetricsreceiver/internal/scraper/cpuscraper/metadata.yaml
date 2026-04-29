@@ -81,8 +81,7 @@ metrics:
     name: system.cpu.time   # Same emitted metric name
     enabled: true
     description: CPU time in milliseconds (new semantic conventions)
-    stability:
-      level: beta
+    stability: beta
     unit: ms
     sum:
       value_type: double

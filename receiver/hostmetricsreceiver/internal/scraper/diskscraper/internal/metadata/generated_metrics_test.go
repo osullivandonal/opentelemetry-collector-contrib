@@ -79,42 +79,36 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemDiskIoDataPoint(ts, 3, "device-val-2", AttributeDirectionWrite)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskIoTimeDataPoint(ts, 1, "device-val")
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemDiskIoTimeDataPoint(ts, 3, "device-val-2")
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskMergedDataPoint(ts, 1, "device-val", AttributeDirectionRead)
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemDiskMergedDataPoint(ts, 3, "device-val-2", AttributeDirectionWrite)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskOperationTimeDataPoint(ts, 1, "device-val", AttributeDirectionRead)
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemDiskOperationTimeDataPoint(ts, 3, "device-val-2", AttributeDirectionWrite)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskOperationsDataPoint(ts, 1, "device-val", AttributeDirectionRead)
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemDiskOperationsDataPoint(ts, 3, "device-val-2", AttributeDirectionWrite)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskPendingOperationsDataPoint(ts, 1, "device-val")
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemDiskPendingOperationsDataPoint(ts, 3, "device-val-2")
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemDiskWeightedIoTimeDataPoint(ts, 1, "device-val")

@@ -81,7 +81,6 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsClientNetCountDataPoint(ts, 3, AttributeNetworkTransportTcp)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientNetTCPConnectionAcceptedDataPoint(ts, 1)
@@ -91,14 +90,12 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsClientOperationCountDataPoint(ts, 3, 16, "nfs.operation.name-val-2")
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientProcedureCountDataPoint(ts, 1, 15, "onc_rpc.procedure.name-val")
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsClientProcedureCountDataPoint(ts, 3, 16, "onc_rpc.procedure.name-val-2")
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsClientRPCAuthrefreshCountDataPoint(ts, 1)
@@ -117,14 +114,12 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsServerIoDataPoint(ts, 3, AttributeNetworkIoDirectionReceive)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerNetCountDataPoint(ts, 1, AttributeNetworkTransportUdp)
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsServerNetCountDataPoint(ts, 3, AttributeNetworkTransportTcp)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerNetTCPConnectionAcceptedDataPoint(ts, 1)
@@ -134,28 +129,24 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsServerOperationCountDataPoint(ts, 3, 16, "nfs.operation.name-val-2")
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerProcedureCountDataPoint(ts, 1, 15, "onc_rpc.procedure.name-val")
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsServerProcedureCountDataPoint(ts, 3, 16, "onc_rpc.procedure.name-val-2")
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerRepcacheRequestsDataPoint(ts, 1, AttributeNfsServerRepcacheStatusHit)
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsServerRepcacheRequestsDataPoint(ts, 3, AttributeNfsServerRepcacheStatusMiss)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerRPCCountDataPoint(ts, 1, AttributeErrorTypeFormat)
 			if tt.name == "reaggregate_set" {
 				mb.RecordNfsServerRPCCountDataPoint(ts, 3, AttributeErrorTypeAuth)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordNfsServerThreadCountDataPoint(ts, 1)

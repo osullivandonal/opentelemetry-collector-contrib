@@ -66,6 +66,31 @@ $defs:
             default:
               - "cpu"
               - "state"
+      system.cpu.time/v1:
+        description: "SystemCPUTimeV1MetricConfig provides config for the system.cpu.time/v1 metric."
+        type: object
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          aggregation_strategy:
+            type: string
+            enum:
+              - "sum"
+              - "avg"
+              - "min"
+              - "max"
+            default: "sum"
+          attributes:
+            type: array
+            items:
+              type: string
+              enum:
+                - "cpu"
+                - "state"
+            default:
+              - "cpu"
+              - "state"
       system.cpu.utilization:
         description: "SystemCPUUtilizationMetricConfig provides config for the system.cpu.utilization metric."
         type: object

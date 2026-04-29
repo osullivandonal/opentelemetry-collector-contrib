@@ -145,6 +145,55 @@ func (ms *SystemCPUTimeMetricConfig) Validate() error {
 	return nil
 }
 
+// SystemCPUTimeV1MetricAttributeKey specifies the key of an attribute for the system.cpu.time/v1 metric.
+type SystemCPUTimeV1MetricAttributeKey string
+
+const (
+	SystemCPUTimeV1MetricAttributeKeyCpu   SystemCPUTimeV1MetricAttributeKey = "cpu"
+	SystemCPUTimeV1MetricAttributeKeyState SystemCPUTimeV1MetricAttributeKey = "state"
+)
+
+// SystemCPUTimeV1MetricConfig provides config for the system.cpu.time/v1 metric.
+type SystemCPUTimeV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                              `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []SystemCPUTimeV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *SystemCPUTimeV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *SystemCPUTimeV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case SystemCPUTimeV1MetricAttributeKeyCpu, SystemCPUTimeV1MetricAttributeKeyState:
+		default:
+			return fmt.Errorf("metric system.cpu.time/v1 doesn't have an attribute %v, valid attributes: [cpu, state]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
 // SystemCPUUtilizationMetricAttributeKey specifies the key of an attribute for the system.cpu.utilization metric.
 type SystemCPUUtilizationMetricAttributeKey string
 
@@ -200,6 +249,7 @@ type MetricsConfig struct {
 	SystemCPULogicalCount  SystemCPULogicalCountMetricConfig  `mapstructure:"system.cpu.logical.count"`
 	SystemCPUPhysicalCount SystemCPUPhysicalCountMetricConfig `mapstructure:"system.cpu.physical.count"`
 	SystemCPUTime          SystemCPUTimeMetricConfig          `mapstructure:"system.cpu.time"`
+	SystemCPUTimeV1        SystemCPUTimeV1MetricConfig        `mapstructure:"system.cpu.time/v1"`
 	SystemCPUUtilization   SystemCPUUtilizationMetricConfig   `mapstructure:"system.cpu.utilization"`
 }
 
@@ -220,6 +270,11 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled:             true,
 			AggregationStrategy: AggregationStrategySum,
 			EnabledAttributes:   []SystemCPUTimeMetricAttributeKey{SystemCPUTimeMetricAttributeKeyCpu, SystemCPUTimeMetricAttributeKeyState},
+		},
+		SystemCPUTimeV1: SystemCPUTimeV1MetricConfig{
+			Enabled:             true,
+			AggregationStrategy: AggregationStrategySum,
+			EnabledAttributes:   []SystemCPUTimeV1MetricAttributeKey{SystemCPUTimeV1MetricAttributeKeyCpu, SystemCPUTimeV1MetricAttributeKeyState},
 		},
 		SystemCPUUtilization: SystemCPUUtilizationMetricConfig{
 			Enabled:             false,

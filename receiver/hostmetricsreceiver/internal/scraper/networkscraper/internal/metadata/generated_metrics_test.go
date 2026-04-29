@@ -89,21 +89,18 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemNetworkDroppedDataPoint(ts, 3, "device-val-2", AttributeDirectionTransmit)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemNetworkErrorsDataPoint(ts, 1, "device-val", AttributeDirectionReceive)
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemNetworkErrorsDataPoint(ts, 3, "device-val-2", AttributeDirectionTransmit)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemNetworkIoDataPoint(ts, 1, "device-val", AttributeDirectionReceive)
 			if tt.name == "reaggregate_set" {
 				mb.RecordSystemNetworkIoDataPoint(ts, 3, "device-val-2", AttributeDirectionTransmit)
 			}
-
 			defaultMetricsCount++
 			allMetricsCount++
 			mb.RecordSystemNetworkPacketsDataPoint(ts, 1, "device-val", AttributeDirectionReceive)
