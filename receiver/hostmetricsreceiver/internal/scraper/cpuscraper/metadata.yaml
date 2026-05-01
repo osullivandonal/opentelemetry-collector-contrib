@@ -77,8 +77,7 @@ metrics:
       if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.
 
   # New semconv metric - disabled by default, users opt-in
-  system.cpu.time/v1:
-    name: system.cpu.time   # Same emitted metric name
+  system.cpu.time@v1:
     enabled: true
     description: CPU time in milliseconds (new semantic conventions)
     stability: beta

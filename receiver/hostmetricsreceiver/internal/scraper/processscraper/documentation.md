@@ -12,7 +12,6 @@ metrics:
     enabled: false
 ```
 
-
 ### process.cpu.time
 
 Total CPU seconds broken down by different states.
@@ -26,7 +25,6 @@ Total CPU seconds broken down by different states.
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | state | Breakdown of CPU usage by type. | Str: ``system``, ``user``, ``wait`` | Recommended | - |
-
 
 ### process.disk.io
 
@@ -42,7 +40,6 @@ Disk bytes transferred.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | direction | Direction of flow of bytes (read or write). | Str: ``read``, ``write`` | Recommended | - |
 
-
 ### process.memory.usage
 
 The amount of physical memory in use.
@@ -50,7 +47,6 @@ The amount of physical memory in use.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
-
 
 ### process.memory.virtual
 
@@ -70,7 +66,6 @@ metrics:
     enabled: true
 ```
 
-
 ### process.context_switches
 
 Number of times the process has been context switched.
@@ -87,7 +82,6 @@ This metric is only available on Linux.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | type | Type of context switched. | Str: ``involuntary``, ``voluntary`` | Recommended | - |
 
-
 ### process.cpu.utilization
 
 Percentage of total CPU time used by the process since last scrape, expressed as a value between 0 and 1. On the first scrape, no data point is emitted for this metric.
@@ -101,7 +95,6 @@ Percentage of total CPU time used by the process since last scrape, expressed as
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | state | Breakdown of CPU usage by type. | Str: ``system``, ``user``, ``wait`` | Recommended | - |
-
 
 ### process.disk.operations
 
@@ -117,7 +110,6 @@ Number of disk operations performed by the process.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | direction | Direction of flow of bytes (read or write). | Str: ``read``, ``write`` | Recommended | - |
 
-
 ### process.handles
 
 Number of open handles held by the process.
@@ -128,7 +120,6 @@ This metric is only available on Windows.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {count} | Sum | Int | Cumulative | false | Development |
 
-
 ### process.memory.utilization
 
 Percentage of total physical memory that is used by the process.
@@ -136,7 +127,6 @@ Percentage of total physical memory that is used by the process.
 | Unit | Metric Type | Value Type | Stability |
 | ---- | ----------- | ---------- | --------- |
 | 1 | Gauge | Double | Development |
-
 
 ### process.open_file_descriptors
 
@@ -147,7 +137,6 @@ On Windows this metric captures the number of open handles currently held by the
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {count} | Sum | Int | Cumulative | false | Development |
-
 
 ### process.paging.faults
 
@@ -165,7 +154,6 @@ This metric is only available on Linux.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | type | Type of memory paging fault. | Str: ``major``, ``minor`` | Recommended | - |
 
-
 ### process.signals_pending
 
 Number of pending signals for the process.
@@ -176,7 +164,6 @@ This metric is only available on Linux.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {signals} | Sum | Int | Cumulative | false | Development |
 
-
 ### process.threads
 
 Process threads count.
@@ -184,7 +171,6 @@ Process threads count.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {threads} | Sum | Int | Cumulative | false | Development |
-
 
 ### process.uptime
 

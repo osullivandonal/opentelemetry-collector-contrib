@@ -12,7 +12,6 @@ metrics:
     enabled: false
 ```
 
-
 ### system.paging.faults
 
 The number of page faults.
@@ -26,7 +25,6 @@ The number of page faults.
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | type | Type of fault. | Str: ``major``, ``minor`` | Recommended | - |
-
 
 ### system.paging.operations
 
@@ -42,7 +40,6 @@ The number of paging operations.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | direction | Page In or Page Out. | Str: ``page_in``, ``page_out`` | Recommended | - |
 | type | Type of fault. | Str: ``major``, ``minor`` | Recommended | - |
-
 
 ### system.paging.usage
 
@@ -68,7 +65,6 @@ metrics:
   <metric_name>:
     enabled: true
 ```
-
 
 ### system.paging.utilization
 

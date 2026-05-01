@@ -12,7 +12,6 @@ metrics:
     enabled: false
 ```
 
-
 ### nfs.client.net.count
 
 Reports the count of kernel NFS client TCP segments and UDP datagrams handled.
@@ -27,7 +26,6 @@ Reports the count of kernel NFS client TCP segments and UDP datagrams handled.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | network.transport | OSI transport layer or inter-process communication method. | Str: ``udp``, ``tcp`` | Recommended | - |
 
-
 ### nfs.client.net.tcp.connection.accepted
 
 Reports the count of kernel NFS client TCP connections accepted
@@ -35,7 +33,6 @@ Reports the count of kernel NFS client TCP connections accepted
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {connection} | Sum | Int | Cumulative | true | Development |
-
 
 ### nfs.client.operation.count
 
@@ -52,7 +49,6 @@ Reports the count of kernel NFSv4+ client operations
 | onc_rpc.version | ONC/Sun RPC program version. | Any Int | Recommended | - |
 | nfs.operation.name | NFSv4+ operation name. | Any Str | Recommended | - |
 
-
 ### nfs.client.procedure.count
 
 Reports the count of kernel NFS client procedures
@@ -68,7 +64,6 @@ Reports the count of kernel NFS client procedures
 | onc_rpc.version | ONC/Sun RPC program version. | Any Int | Recommended | - |
 | onc_rpc.procedure.name | ONC/Sun RPC procedure name. | Any Str | Recommended | - |
 
-
 ### nfs.client.rpc.authrefresh.count
 
 Reports the count of kernel NFS client RPC authentication refreshes
@@ -76,7 +71,6 @@ Reports the count of kernel NFS client RPC authentication refreshes
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {authrefresh} | Sum | Int | Cumulative | true | Development |
-
 
 ### nfs.client.rpc.count
 
@@ -86,7 +80,6 @@ Reports the count of kernel NFS client RPCs sent, regardless of whether they're 
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {request} | Sum | Int | Cumulative | true | Development |
 
-
 ### nfs.client.rpc.retransmit.count
 
 Reports the count of kernel NFS client RPC retransmits
@@ -95,7 +88,6 @@ Reports the count of kernel NFS client RPC retransmits
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {retransmit} | Sum | Int | Cumulative | true | Development |
 
-
 ### nfs.server.fh.stale.count
 
 Reports the cumulative count of kernel NFS server stale file handles.
@@ -103,7 +95,6 @@ Reports the cumulative count of kernel NFS server stale file handles.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {fh} | Sum | Int | Cumulative | true | Development |
-
 
 ### nfs.server.io
 
@@ -119,7 +110,6 @@ Reports the count of kernel NFS server bytes returned to receive and transmit (r
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | network.io.direction | The network IO operation direction. | Str: ``transmit``, ``receive`` | Recommended | - |
 
-
 ### nfs.server.net.count
 
 Reports the count of kernel NFS server TCP segments and UDP datagrams handled.
@@ -134,7 +124,6 @@ Reports the count of kernel NFS server TCP segments and UDP datagrams handled.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | network.transport | OSI transport layer or inter-process communication method. | Str: ``udp``, ``tcp`` | Recommended | - |
 
-
 ### nfs.server.net.tcp.connection.accepted
 
 Reports the count of kernel NFS server TCP connections accepted
@@ -142,7 +131,6 @@ Reports the count of kernel NFS server TCP connections accepted
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {connection} | Sum | Int | Cumulative | true | Development |
-
 
 ### nfs.server.operation.count
 
@@ -159,7 +147,6 @@ Reports the count of kernel NFSv4+ server operations
 | onc_rpc.version | ONC/Sun RPC program version. | Any Int | Recommended | - |
 | nfs.operation.name | NFSv4+ operation name. | Any Str | Recommended | - |
 
-
 ### nfs.server.procedure.count
 
 Reports the count of kernel NFS server procedures
@@ -175,7 +162,6 @@ Reports the count of kernel NFS server procedures
 | onc_rpc.version | ONC/Sun RPC program version. | Any Int | Recommended | - |
 | onc_rpc.procedure.name | ONC/Sun RPC procedure name. | Any Str | Recommended | - |
 
-
 ### nfs.server.repcache.requests
 
 Reports the kernel NFS server reply cache request count by cache hit status.
@@ -190,7 +176,6 @@ Reports the kernel NFS server reply cache request count by cache hit status.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | nfs.server.repcache.status | NFS Server replies check a Reply Cache (repcache), which can have one of 3 result states: 'hit', 'miss', or 'nocache'. | Str: ``hit``, ``miss``, ``nocache`` | Recommended | - |
 
-
 ### nfs.server.rpc.count
 
 Reports the count of kernel NFS server RPCs handled.
@@ -204,7 +189,6 @@ Reports the count of kernel NFS server RPCs handled.
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | error.type | Describes a class of error the operation ended with. | Str: ``format``, ``auth``, ``client`` | Recommended | - |
-
 
 ### nfs.server.thread.count
 

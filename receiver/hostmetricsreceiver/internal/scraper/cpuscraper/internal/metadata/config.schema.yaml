@@ -66,8 +66,8 @@ $defs:
             default:
               - "cpu"
               - "state"
-      system.cpu.time/v1:
-        description: "SystemCPUTimeV1MetricConfig provides config for the system.cpu.time/v1 metric."
+      system.cpu.time@v1:
+        description: "SystemCPUTimeV1MetricConfig provides config for the system.cpu.time@v1 metric."
         type: object
         properties:
           enabled:

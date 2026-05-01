@@ -145,7 +145,7 @@ func (ms *SystemCPUTimeMetricConfig) Validate() error {
 	return nil
 }
 
-// SystemCPUTimeV1MetricAttributeKey specifies the key of an attribute for the system.cpu.time/v1 metric.
+// SystemCPUTimeV1MetricAttributeKey specifies the key of an attribute for the system.cpu.time@v1 metric.
 type SystemCPUTimeV1MetricAttributeKey string
 
 const (
@@ -153,7 +153,7 @@ const (
 	SystemCPUTimeV1MetricAttributeKeyState SystemCPUTimeV1MetricAttributeKey = "state"
 )
 
-// SystemCPUTimeV1MetricConfig provides config for the system.cpu.time/v1 metric.
+// SystemCPUTimeV1MetricConfig provides config for the system.cpu.time@v1 metric.
 type SystemCPUTimeV1MetricConfig struct {
 	Enabled          bool `mapstructure:"enabled"`
 	enabledSetByUser bool
@@ -181,7 +181,7 @@ func (ms *SystemCPUTimeV1MetricConfig) Validate() error {
 		switch val {
 		case SystemCPUTimeV1MetricAttributeKeyCpu, SystemCPUTimeV1MetricAttributeKeyState:
 		default:
-			return fmt.Errorf("metric system.cpu.time/v1 doesn't have an attribute %v, valid attributes: [cpu, state]", val)
+			return fmt.Errorf("metric system.cpu.time@v1 doesn't have an attribute %v, valid attributes: [cpu, state]", val)
 		}
 	}
 
@@ -249,7 +249,7 @@ type MetricsConfig struct {
 	SystemCPULogicalCount  SystemCPULogicalCountMetricConfig  `mapstructure:"system.cpu.logical.count"`
 	SystemCPUPhysicalCount SystemCPUPhysicalCountMetricConfig `mapstructure:"system.cpu.physical.count"`
 	SystemCPUTime          SystemCPUTimeMetricConfig          `mapstructure:"system.cpu.time"`
-	SystemCPUTimeV1        SystemCPUTimeV1MetricConfig        `mapstructure:"system.cpu.time/v1"`
+	SystemCPUTimeV1        SystemCPUTimeV1MetricConfig        `mapstructure:"system.cpu.time@v1"`
 	SystemCPUUtilization   SystemCPUUtilizationMetricConfig   `mapstructure:"system.cpu.utilization"`
 }
 

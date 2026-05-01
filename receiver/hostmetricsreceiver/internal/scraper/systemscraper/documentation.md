@@ -12,7 +12,6 @@ metrics:
     enabled: false
 ```
 
-
 ### system.uptime
 
 The time the system has been running

@@ -12,7 +12,6 @@ metrics:
     enabled: false
 ```
 
-
 ### system.memory.usage
 
 Bytes of memory in use.
@@ -37,7 +36,6 @@ metrics:
     enabled: true
 ```
 
-
 ### system.linux.memory.available
 
 An estimate of how much memory is available for starting new applications, without swapping. This is a more accurate alternative than system.memory.usage with state=free. (Linux only)
@@ -45,7 +43,6 @@ An estimate of how much memory is available for starting new applications, witho
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
-
 
 ### system.linux.memory.dirty
 
@@ -55,7 +52,6 @@ The amount of dirty memory according to `/proc/meminfo`.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
 
-
 ### system.memory.limit
 
 Total bytes of memory available.
@@ -63,7 +59,6 @@ Total bytes of memory available.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
-
 
 ### system.memory.linux.hugepages.limit
 
@@ -73,7 +68,6 @@ Total number of hugepages available.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {page} | Sum | Int | Cumulative | false | Development |
 
-
 ### system.memory.linux.hugepages.page_size
 
 System hugepage size in bytes.
@@ -81,7 +75,6 @@ System hugepage size in bytes.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
-
 
 ### system.memory.linux.hugepages.reserved
 
@@ -91,7 +84,6 @@ Number of reserved hugepages (hugepages for which a commitment to allocate has b
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {page} | Sum | Int | Cumulative | false | Development |
 
-
 ### system.memory.linux.hugepages.surplus
 
 Number of surplus hugepages (overcommitted hugepages beyond the persistent pool). This is reported as a separate metric rather than a usage state because surplus pages can be in either used or free state, and including them would break the semantic convention that usage states must sum to the limit.
@@ -99,7 +91,6 @@ Number of surplus hugepages (overcommitted hugepages beyond the persistent pool)
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {page} | Sum | Int | Cumulative | false | Development |
-
 
 ### system.memory.linux.hugepages.usage
 
@@ -115,7 +106,6 @@ Number of hugepages in use by state.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | system.memory.linux.hugepages.state | Breakdown of hugepages usage by state. | Str: ``free``, ``used`` | Recommended | - |
 
-
 ### system.memory.linux.hugepages.utilization
 
 Percentage of hugepages in use by state.
@@ -130,7 +120,6 @@ Percentage of hugepages in use by state.
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | system.memory.linux.hugepages.state | Breakdown of hugepages usage by state. | Str: ``free``, ``used`` | Recommended | - |
 
-
 ### system.memory.linux.shared
 
 Shared memory usage, including tmpfs filesystems and System V/POSIX shared memory. Only supported on Linux.
@@ -139,7 +128,6 @@ Shared memory usage, including tmpfs filesystems and System V/POSIX shared memor
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | By | Sum | Int | Cumulative | false | Development |
 
-
 ### system.memory.page_size
 
 A constant value for the system's configured page size.
@@ -147,7 +135,6 @@ A constant value for the system's configured page size.
 | Unit | Metric Type | Value Type | Stability |
 | ---- | ----------- | ---------- | --------- |
 | By | Gauge | Int | Development |
-
 
 ### system.memory.utilization
 

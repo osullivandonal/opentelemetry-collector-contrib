@@ -398,7 +398,7 @@ type metricSystemCPUTimeV1 struct {
 	aggDataPoints []float64                   // slice containing number of aggregated datapoints at each index
 }
 
-// init fills system.cpu.time/v1 metric with initial data.
+// init fills system.cpu.time@v1 metric with initial data.
 func (m *metricSystemCPUTimeV1) init() {
 	m.data.SetName("system.cpu.time")
 	m.data.SetDescription("CPU time in milliseconds (new semantic conventions)")
@@ -610,7 +610,6 @@ func WithStartTime(startTime pcommon.Timestamp) MetricBuilderOption {
 		mb.startTime = startTime
 	})
 }
-
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, options ...MetricBuilderOption) *MetricsBuilder {
 	if !mbc.Metrics.SystemCPUTime.enabledSetByUser {
 		settings.Logger.Warn("[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.")
@@ -739,7 +738,7 @@ func (mb *MetricsBuilder) RecordSystemCPUTimeDataPoint(ts pcommon.Timestamp, val
 	mb.metricSystemCPUTime.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
 }
 
-// RecordSystemCPUTimeV1DataPoint adds a data point to system.cpu.time/v1 metric.
+// RecordSystemCPUTimeV1DataPoint adds a data point to system.cpu.time@v1 metric.
 func (mb *MetricsBuilder) RecordSystemCPUTimeV1DataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue AttributeState) {
 	mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
 }

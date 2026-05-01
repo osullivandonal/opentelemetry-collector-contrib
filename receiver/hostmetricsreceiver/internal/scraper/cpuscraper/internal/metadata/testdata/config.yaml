@@ -11,7 +11,7 @@ all_set:
     system.cpu.time:
       enabled: true
       attributes: ["cpu","state"]
-    system.cpu.time/v1:
+    system.cpu.time@v1:
       enabled: true
       attributes: ["cpu","state"]
     system.cpu.utilization:
@@ -29,7 +29,7 @@ reaggregate_set:
     system.cpu.time:
       enabled: true
       attributes: []
-    system.cpu.time/v1:
+    system.cpu.time@v1:
       enabled: true
       attributes: []
     system.cpu.utilization:
@@ -47,7 +47,7 @@ none_set:
     system.cpu.time:
       enabled: false
       attributes: ["cpu","state"]
-    system.cpu.time/v1:
+    system.cpu.time@v1:
       enabled: false
       attributes: ["cpu","state"]
     system.cpu.utilization:
