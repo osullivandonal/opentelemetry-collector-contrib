@@ -56,6 +56,54 @@ func (ms *SystemCPUFrequencyMetricConfig) Validate() error {
 	return nil
 }
 
+// SystemCPUFrequencyV1MetricAttributeKey specifies the key of an attribute for the system.cpu.frequency@v1 metric.
+type SystemCPUFrequencyV1MetricAttributeKey string
+
+const (
+	SystemCPUFrequencyV1MetricAttributeKeyCPULogicalNumber SystemCPUFrequencyV1MetricAttributeKey = "cpu.logical_number"
+)
+
+// SystemCPUFrequencyV1MetricConfig provides config for the system.cpu.frequency@v1 metric.
+type SystemCPUFrequencyV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                                   `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []SystemCPUFrequencyV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *SystemCPUFrequencyV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *SystemCPUFrequencyV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case SystemCPUFrequencyV1MetricAttributeKeyCPULogicalNumber:
+		default:
+			return fmt.Errorf("metric system.cpu.frequency@v1 doesn't have an attribute %v, valid attributes: [cpu.logical_number]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
 // SystemCPULogicalCountMetricConfig provides config for the system.cpu.logical.count metric.
 type SystemCPULogicalCountMetricConfig struct {
 	Enabled          bool `mapstructure:"enabled"`
@@ -149,8 +197,8 @@ func (ms *SystemCPUTimeMetricConfig) Validate() error {
 type SystemCPUTimeV1MetricAttributeKey string
 
 const (
-	SystemCPUTimeV1MetricAttributeKeyCpu   SystemCPUTimeV1MetricAttributeKey = "cpu"
-	SystemCPUTimeV1MetricAttributeKeyState SystemCPUTimeV1MetricAttributeKey = "state"
+	SystemCPUTimeV1MetricAttributeKeyCPULogicalNumber SystemCPUTimeV1MetricAttributeKey = "cpu.logical_number"
+	SystemCPUTimeV1MetricAttributeKeyState            SystemCPUTimeV1MetricAttributeKey = "state"
 )
 
 // SystemCPUTimeV1MetricConfig provides config for the system.cpu.time@v1 metric.
@@ -179,9 +227,9 @@ func (ms *SystemCPUTimeV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
 func (ms *SystemCPUTimeV1MetricConfig) Validate() error {
 	for _, val := range ms.EnabledAttributes {
 		switch val {
-		case SystemCPUTimeV1MetricAttributeKeyCpu, SystemCPUTimeV1MetricAttributeKeyState:
+		case SystemCPUTimeV1MetricAttributeKeyCPULogicalNumber, SystemCPUTimeV1MetricAttributeKeyState:
 		default:
-			return fmt.Errorf("metric system.cpu.time@v1 doesn't have an attribute %v, valid attributes: [cpu, state]", val)
+			return fmt.Errorf("metric system.cpu.time@v1 doesn't have an attribute %v, valid attributes: [cpu.logical_number, state]", val)
 		}
 	}
 
@@ -246,6 +294,7 @@ func (ms *SystemCPUUtilizationMetricConfig) Validate() error {
 // MetricsConfig provides config for cpu metrics.
 type MetricsConfig struct {
 	SystemCPUFrequency     SystemCPUFrequencyMetricConfig     `mapstructure:"system.cpu.frequency"`
+	SystemCPUFrequencyV1   SystemCPUFrequencyV1MetricConfig   `mapstructure:"system.cpu.frequency@v1"`
 	SystemCPULogicalCount  SystemCPULogicalCountMetricConfig  `mapstructure:"system.cpu.logical.count"`
 	SystemCPUPhysicalCount SystemCPUPhysicalCountMetricConfig `mapstructure:"system.cpu.physical.count"`
 	SystemCPUTime          SystemCPUTimeMetricConfig          `mapstructure:"system.cpu.time"`
@@ -260,6 +309,11 @@ func DefaultMetricsConfig() MetricsConfig {
 			AggregationStrategy: AggregationStrategyAvg,
 			EnabledAttributes:   []SystemCPUFrequencyMetricAttributeKey{SystemCPUFrequencyMetricAttributeKeyCpu},
 		},
+		SystemCPUFrequencyV1: SystemCPUFrequencyV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategyAvg,
+			EnabledAttributes:   []SystemCPUFrequencyV1MetricAttributeKey{SystemCPUFrequencyV1MetricAttributeKeyCPULogicalNumber},
+		},
 		SystemCPULogicalCount: SystemCPULogicalCountMetricConfig{
 			Enabled: false,
 		},
@@ -273,8 +327,8 @@ func DefaultMetricsConfig() MetricsConfig {
 		},
 		SystemCPUTimeV1: SystemCPUTimeV1MetricConfig{
 			Enabled:             true,
-			AggregationStrategy: AggregationStrategySum,
-			EnabledAttributes:   []SystemCPUTimeV1MetricAttributeKey{SystemCPUTimeV1MetricAttributeKeyCpu, SystemCPUTimeV1MetricAttributeKeyState},
+			AggregationStrategy: AggregationStrategyAvg,
+			EnabledAttributes:   []SystemCPUTimeV1MetricAttributeKey{SystemCPUTimeV1MetricAttributeKeyCPULogicalNumber, SystemCPUTimeV1MetricAttributeKeyState},
 		},
 		SystemCPUUtilization: SystemCPUUtilizationMetricConfig{
 			Enabled:             false,

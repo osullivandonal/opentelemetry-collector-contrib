@@ -20,6 +20,14 @@ Total seconds each logical CPU spent on each mode.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | s | Sum | Double | Cumulative | true | Development |
 
+#### Migration
+
+- Target Metric: `system.cpu.time@v1`
+- Disable Old Gate: `receiver.hostmetrics.DontEmitV0SystemConventions`
+- Enable New Gate: `receiver.hostmetrics.EmitV1SystemConventions`
+
+When the disable-old gate is enabled, emission of this metric is suppressed. When the enable-new gate is enabled, the target metric is emitted. If both gates are disabled, only this metric is emitted; if both are enabled, dual emission occurs.
+
 #### Attributes
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
@@ -27,19 +35,21 @@ Total seconds each logical CPU spent on each mode.
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended | - |
 | state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended | - |
 
-### system.cpu.time
+### system.cpu.time@v1
 
 CPU time in milliseconds (new semantic conventions)
 
-| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
-| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| ms | Sum | Double | Cumulative | true | Beta |
+| Unit | Metric Type | Value Type | Stability |
+| ---- | ----------- | ---------- | --------- |
+| s | Gauge | Double | Beta |
+
+Emitted Name: `system.cpu.time`
 
 #### Attributes
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
-| cpu | Logical CPU number starting at 0. | Any Str | Recommended | - |
+| cpu.logical_number | The logical CPU number [0, n-1]. | Any Str | Recommended | - |
 | state | Breakdown of CPU usage by type. | Str: ``idle``, ``interrupt``, ``nice``, ``softirq``, ``steal``, ``system``, ``user``, ``wait`` | Recommended | - |
 
 ## Optional Metrics
@@ -60,11 +70,35 @@ Current frequency of the CPU core in Hz.
 | ---- | ----------- | ---------- | --------- |
 | Hz | Gauge | Double | Development |
 
+#### Migration
+
+- Target Metric: `system.cpu.frequency@v1`
+- Disable Old Gate: `receiver.hostmetrics.DontEmitV0SystemConventions`
+- Enable New Gate: `receiver.hostmetrics.EmitV1SystemConventions`
+
+When the disable-old gate is enabled, emission of this metric is suppressed. When the enable-new gate is enabled, the target metric is emitted. If both gates are disabled, only this metric is emitted; if both are enabled, dual emission occurs.
+
 #### Attributes
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | cpu | Logical CPU number starting at 0. | Any Str | Recommended | - |
+
+### system.cpu.frequency@v1
+
+Current frequency of the CPU core in Hz. (V1)
+
+| Unit | Metric Type | Value Type | Stability |
+| ---- | ----------- | ---------- | --------- |
+| Hz | Gauge | Double | Development |
+
+Emitted Name: `system.cpu.frequency`
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| cpu.logical_number | The logical CPU number [0, n-1]. | Any Str | Recommended | - |
 
 ### system.cpu.logical.count
 
@@ -103,6 +137,7 @@ This component has the following feature gates:
 
 | Feature Gate | Stage | Description | From Version | To Version | Reference |
 | ------------ | ----- | ----------- | ------------ | ---------- | --------- |
-| `receiver.hostmetrics.EmitV1SemanticConventions` | alpha | When enabled, V1 Semantic Conventions are emitted | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
+| `receiver.hostmetrics.DontEmitV0SystemConventions` | alpha | When enabled, semconv legacy attributes are disabled. | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
+| `receiver.hostmetrics.EmitV1SystemConventions` | alpha | When enabled, semconv stable attributes are enabled. | v0.145.0 | N/A | [Link](https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592) |
 
 For more information about feature gates, see the [Feature Gates](https://github.com/open-telemetry/opentelemetry-collector/blob/main/featuregate/README.md) documentation.

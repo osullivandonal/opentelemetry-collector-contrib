@@ -4,6 +4,9 @@ all_set:
     system.cpu.frequency:
       enabled: true
       attributes: ["cpu"]
+    system.cpu.frequency@v1:
+      enabled: true
+      attributes: ["cpu.logical_number"]
     system.cpu.logical.count:
       enabled: true
     system.cpu.physical.count:
@@ -13,13 +16,16 @@ all_set:
       attributes: ["cpu","state"]
     system.cpu.time@v1:
       enabled: true
-      attributes: ["cpu","state"]
+      attributes: ["cpu.logical_number","state"]
     system.cpu.utilization:
       enabled: true
       attributes: ["cpu","state"]
 reaggregate_set:
   metrics:
     system.cpu.frequency:
+      enabled: true
+      attributes: []
+    system.cpu.frequency@v1:
       enabled: true
       attributes: []
     system.cpu.logical.count:
@@ -40,6 +46,9 @@ none_set:
     system.cpu.frequency:
       enabled: false
       attributes: ["cpu"]
+    system.cpu.frequency@v1:
+      enabled: false
+      attributes: ["cpu.logical_number"]
     system.cpu.logical.count:
       enabled: false
     system.cpu.physical.count:
@@ -49,7 +58,7 @@ none_set:
       attributes: ["cpu","state"]
     system.cpu.time@v1:
       enabled: false
-      attributes: ["cpu","state"]
+      attributes: ["cpu.logical_number","state"]
     system.cpu.utilization:
       enabled: false
       attributes: ["cpu","state"]

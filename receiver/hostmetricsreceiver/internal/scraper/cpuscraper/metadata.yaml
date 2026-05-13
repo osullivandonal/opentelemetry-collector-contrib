@@ -13,18 +13,27 @@ reaggregation_enabled: true
 sem_conv_version: 1.9.0
 
 feature_gates:
-  - id: receiver.hostmetrics.EmitV1SemanticConventions
+  - id: receiver.hostmetrics.DontEmitV0SystemConventions
+    description: When enabled, semconv legacy attributes are disabled.
     stage: alpha
-    description: >-
-      When enabled, V1 Semantic Conventions are emitted
     from_version: v0.145.0
     reference_url: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592
+  - id: receiver.hostmetrics.EmitV1SystemConventions
+    description: When enabled, semconv stable attributes are enabled.
+    stage: alpha
+    from_version: v0.145.0
+    reference_url: https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/45592
+
 
 attributes:
   cpu:
     description: Logical CPU number starting at 0.
     type: string
     requirement_level: recommended
+
+  cpu.logical_number:
+    description: The logical CPU number [0, n-1].
+    type: string
 
   state:
     description: Breakdown of CPU usage by type.
@@ -41,6 +50,22 @@ metrics:
     gauge:
       value_type: double
     attributes: [cpu]
+    migration:
+      to: system.cpu.frequency@v1
+      through_gates:
+        disable_old: receiver.hostmetrics.DontEmitV0SystemConventions
+        enable_new: receiver.hostmetrics.EmitV1SystemConventions
+    warnings:
+      if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.frequency@v1 instead.
+
+  system.cpu.frequency@v1:
+    enabled: false
+    description: Current frequency of the CPU core in Hz. (V1)
+    unit: "Hz"
+    stability: development
+    gauge:
+      value_type: double
+    attributes: [cpu.logical_number]
 
   system.cpu.logical.count:
     enabled: false
@@ -73,20 +98,23 @@ metrics:
       monotonic: true
       aggregation_temporality: cumulative
     attributes: [cpu, state]
+    migration:
+      to: system.cpu.time@v1
+      through_gates:
+        disable_old: receiver.hostmetrics.DontEmitV0SystemConventions
+        enable_new: receiver.hostmetrics.EmitV1SystemConventions
     warnings:
-      if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.
+      if_enabled_not_set: This metric will be disabled by default in a future release. Use system.cpu.time@v1 instead.
 
   # New semconv metric - disabled by default, users opt-in
   system.cpu.time@v1:
     enabled: true
     description: CPU time in milliseconds (new semantic conventions)
     stability: beta
-    unit: ms
-    sum:
+    unit: s
+    gauge:
       value_type: double
-      monotonic: true
-      aggregation_temporality: cumulative
-    attributes: [cpu, state]
+    attributes: [cpu.logical_number, state]
 
   system.cpu.utilization:
     enabled: false

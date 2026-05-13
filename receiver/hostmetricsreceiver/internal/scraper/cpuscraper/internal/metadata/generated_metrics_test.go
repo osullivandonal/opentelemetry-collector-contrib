@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper/scrapertest"
@@ -59,13 +61,18 @@ func TestMetricsBuilder(t *testing.T) {
 			mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, tt.name), settings, WithStartTime(start))
 			aggMap := make(map[string]string) // contains the aggregation strategies for each metric name
 			aggMap["SystemCPUFrequency"] = mb.metricSystemCPUFrequency.config.AggregationStrategy
+			aggMap["SystemCPUFrequencyV1"] = mb.metricSystemCPUFrequencyV1.config.AggregationStrategy
 			aggMap["SystemCPUTime"] = mb.metricSystemCPUTime.config.AggregationStrategy
 			aggMap["SystemCPUTimeV1"] = mb.metricSystemCPUTimeV1.config.AggregationStrategy
 			aggMap["SystemCPUUtilization"] = mb.metricSystemCPUUtilization.config.AggregationStrategy
 
 			expectedWarnings := 0
 			if tt.metricsSet == testDataSetDefault {
-				assert.Equal(t, "[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.", observedLogs.All()[expectedWarnings].Message)
+				assert.Equal(t, "[WARNING] Please set `enabled` field explicitly for `system.cpu.frequency`: This metric will be disabled by default in a future release. Use system.cpu.frequency@v1 instead.", observedLogs.All()[expectedWarnings].Message)
+				expectedWarnings++
+			}
+			if tt.metricsSet == testDataSetDefault {
+				assert.Equal(t, "[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time@v1 instead.", observedLogs.All()[expectedWarnings].Message)
 				expectedWarnings++
 			}
 			if tt.metricsSet != testDataSetReag {
@@ -103,6 +110,7 @@ func TestMetricsBuilder(t *testing.T) {
 			metrics := mb.Emit(WithResource(res))
 			if tt.name == "reaggregate_set" {
 				assert.Empty(t, mb.metricSystemCPUFrequency.aggDataPoints)
+				assert.Empty(t, mb.metricSystemCPUFrequencyV1.aggDataPoints)
 				assert.Empty(t, mb.metricSystemCPUTime.aggDataPoints)
 				assert.Empty(t, mb.metricSystemCPUTimeV1.aggDataPoints)
 				assert.Empty(t, mb.metricSystemCPUUtilization.aggDataPoints)
@@ -299,4 +307,174 @@ func TestMetricsBuilder(t *testing.T) {
 			}
 		})
 	}
+}
+func TestVersionedMetrics(t *testing.T) {
+	t.Run("system.cpu.frequency", func(t *testing.T) {
+		tests := []struct {
+			name               string
+			disableOld         bool
+			enableNew          bool
+			expectLegacyMetric bool
+			expectNewMetric    bool
+			expectLegacyAttrs  bool
+		}{
+			{
+				name:               "legacy_only",
+				disableOld:         false,
+				enableNew:          false,
+				expectLegacyMetric: true,
+				expectNewMetric:    false,
+			},
+			{
+				name:               "dual_emission",
+				disableOld:         false,
+				enableNew:          true,
+				expectLegacyMetric: false,
+				expectNewMetric:    true,
+				expectLegacyAttrs:  true,
+			},
+
+			{
+				name:               "new_only",
+				disableOld:         true,
+				enableNew:          true,
+				expectLegacyMetric: false,
+				expectNewMetric:    true,
+				expectLegacyAttrs:  false,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"receiver.hostmetrics.DontEmitV0SystemConventions", tt.disableOld))
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"receiver.hostmetrics.EmitV1SystemConventions", tt.enableNew))
+				t.Cleanup(func() {
+					featuregate.GlobalRegistry().Set("receiver.hostmetrics.DontEmitV0SystemConventions", false)
+					featuregate.GlobalRegistry().Set("receiver.hostmetrics.EmitV1SystemConventions", false)
+				})
+
+				start := pcommon.Timestamp(1_000_000_000)
+				ts := pcommon.Timestamp(1_000_001_000)
+				settings := scrapertest.NewNopSettings(scrapertest.NopType)
+				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
+
+				mb.RecordSystemCPUFrequencyDataPoint(ts, 1, "cpu-val")
+
+				metrics := mb.Emit(WithResource(pcommon.NewResource()))
+
+				// Count metrics by name and type
+				var legacyFound, newFound bool
+				for ri := 0; ri < metrics.ResourceMetrics().Len(); ri++ {
+					ms := metrics.ResourceMetrics().At(ri).ScopeMetrics().At(0).Metrics()
+					for mi := 0; mi < ms.Len(); mi++ {
+						m := ms.At(mi)
+						// Same emitted name, same type - distinguish by attributes
+						if m.Name() == "system.cpu.frequency" {
+							dp := m.Gauge().DataPoints().At(0)
+							_, hasNewAttr := dp.Attributes().Get("cpu.logical_number")
+							if hasNewAttr {
+								// Has v1-specific attribute - this is the new metric
+								newFound = true
+								if tt.expectLegacyAttrs {
+									_, hasCpu := dp.Attributes().Get("cpu")
+									assert.True(t, hasCpu, "expected legacy attr cpu")
+								}
+							} else {
+								// No v1-specific attribute - this is the legacy metric
+								legacyFound = true
+							}
+						}
+					}
+				}
+				assert.Equal(t, tt.expectLegacyMetric, legacyFound)
+				assert.Equal(t, tt.expectNewMetric, newFound)
+			})
+		}
+	})
+	t.Run("system.cpu.time", func(t *testing.T) {
+		tests := []struct {
+			name               string
+			disableOld         bool
+			enableNew          bool
+			expectLegacyMetric bool
+			expectNewMetric    bool
+			expectLegacyAttrs  bool
+		}{
+			{
+				name:               "legacy_only",
+				disableOld:         false,
+				enableNew:          false,
+				expectLegacyMetric: true,
+				expectNewMetric:    false,
+			},
+			{
+				name:               "dual_emission",
+				disableOld:         false,
+				enableNew:          true,
+				expectLegacyMetric: false,
+				expectNewMetric:    true,
+				expectLegacyAttrs:  true,
+			},
+
+			{
+				name:               "new_only",
+				disableOld:         true,
+				enableNew:          true,
+				expectLegacyMetric: false,
+				expectNewMetric:    true,
+				expectLegacyAttrs:  false,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"receiver.hostmetrics.DontEmitV0SystemConventions", tt.disableOld))
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"receiver.hostmetrics.EmitV1SystemConventions", tt.enableNew))
+				t.Cleanup(func() {
+					featuregate.GlobalRegistry().Set("receiver.hostmetrics.DontEmitV0SystemConventions", false)
+					featuregate.GlobalRegistry().Set("receiver.hostmetrics.EmitV1SystemConventions", false)
+				})
+
+				start := pcommon.Timestamp(1_000_000_000)
+				ts := pcommon.Timestamp(1_000_001_000)
+				settings := scrapertest.NewNopSettings(scrapertest.NopType)
+				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
+
+				mb.RecordSystemCPUTimeDataPoint(ts, 1, "cpu-val", AttributeStateIdle)
+
+				metrics := mb.Emit(WithResource(pcommon.NewResource()))
+
+				// Count metrics by name and type
+				var legacyFound, newFound bool
+				for ri := 0; ri < metrics.ResourceMetrics().Len(); ri++ {
+					ms := metrics.ResourceMetrics().At(ri).ScopeMetrics().At(0).Metrics()
+					for mi := 0; mi < ms.Len(); mi++ {
+						m := ms.At(mi)
+						// Same emitted name, different types - distinguish by type
+						if m.Name() == "system.cpu.time" {
+							if m.Type() == pmetric.MetricTypeSum {
+								legacyFound = true
+							}
+							if m.Type() == pmetric.MetricTypeGauge {
+								newFound = true
+								if tt.expectLegacyAttrs {
+									dp := m.Gauge().DataPoints().At(0)
+									_, hasCpu := dp.Attributes().Get("cpu")
+									assert.True(t, hasCpu, "expected legacy attr cpu")
+									_, hasState := dp.Attributes().Get("state")
+									assert.True(t, hasState, "expected legacy attr state")
+								}
+							}
+						}
+					}
+				}
+				assert.Equal(t, tt.expectLegacyMetric, legacyFound)
+				assert.Equal(t, tt.expectNewMetric, newFound)
+			})
+		}
+	})
 }

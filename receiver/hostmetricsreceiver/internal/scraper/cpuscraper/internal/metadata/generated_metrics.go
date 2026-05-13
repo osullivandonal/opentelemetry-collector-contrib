@@ -74,6 +74,9 @@ var MetricsInfo = metricsInfo{
 	SystemCPUFrequency: metricInfo{
 		Name: "system.cpu.frequency",
 	},
+	SystemCPUFrequencyV1: metricInfo{
+		Name: "system.cpu.frequency",
+	},
 	SystemCPULogicalCount: metricInfo{
 		Name: "system.cpu.logical.count",
 	},
@@ -93,6 +96,7 @@ var MetricsInfo = metricsInfo{
 
 type metricsInfo struct {
 	SystemCPUFrequency     metricInfo
+	SystemCPUFrequencyV1   metricInfo
 	SystemCPULogicalCount  metricInfo
 	SystemCPUPhysicalCount metricInfo
 	SystemCPUTime          metricInfo
@@ -185,6 +189,98 @@ func (m *metricSystemCPUFrequency) emit(metrics pmetric.MetricSlice) {
 
 func newMetricSystemCPUFrequency(cfg SystemCPUFrequencyMetricConfig) metricSystemCPUFrequency {
 	m := metricSystemCPUFrequency{config: cfg}
+
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricSystemCPUFrequencyV1 struct {
+	data          pmetric.Metric                   // data buffer for generated metric.
+	config        SystemCPUFrequencyV1MetricConfig // metric config provided by user.
+	capacity      int                              // max observed number of data points added to the metric.
+	aggDataPoints []float64                        // slice containing number of aggregated datapoints at each index
+}
+
+// init fills system.cpu.frequency@v1 metric with initial data.
+func (m *metricSystemCPUFrequencyV1) init() {
+	m.data.SetName("system.cpu.frequency")
+	m.data.SetDescription("Current frequency of the CPU core in Hz. (V1)")
+	m.data.SetUnit("Hz")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+	m.aggDataPoints = m.aggDataPoints[:0]
+}
+
+func (m *metricSystemCPUFrequencyV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string, emitLegacyAttrs bool) {
+	if !m.config.Enabled {
+		return
+	}
+
+	dp := pmetric.NewNumberDataPoint()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	if slices.Contains(m.config.EnabledAttributes, SystemCPUFrequencyV1MetricAttributeKeyCPULogicalNumber) {
+		dp.Attributes().PutStr("cpu.logical_number", cpuLogicalNumberAttributeValue)
+	}
+	if emitLegacyAttrs {
+		dp.Attributes().PutStr("cpu", cpuLogicalNumberAttributeValue)
+	}
+
+	var s string
+	dps := m.data.Gauge().DataPoints()
+	for i := 0; i < dps.Len(); i++ {
+		dpi := dps.At(i)
+		if dp.Attributes().Equal(dpi.Attributes()) && dp.StartTimestamp() == dpi.StartTimestamp() && dp.Timestamp() == dpi.Timestamp() {
+			switch s = m.config.AggregationStrategy; s {
+			case AggregationStrategySum, AggregationStrategyAvg:
+				dpi.SetDoubleValue(dpi.DoubleValue() + val)
+				m.aggDataPoints[i] += 1
+				return
+			case AggregationStrategyMin:
+				if dpi.DoubleValue() > val {
+					dpi.SetDoubleValue(val)
+				}
+				return
+			case AggregationStrategyMax:
+				if dpi.DoubleValue() < val {
+					dpi.SetDoubleValue(val)
+				}
+				return
+			}
+		}
+	}
+
+	dp.SetDoubleValue(val)
+	m.aggDataPoints = append(m.aggDataPoints, 1)
+	dp.MoveTo(dps.AppendEmpty())
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricSystemCPUFrequencyV1) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricSystemCPUFrequencyV1) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		if m.config.AggregationStrategy == AggregationStrategyAvg {
+			for i, aggCount := range m.aggDataPoints {
+				m.data.Gauge().DataPoints().At(i).SetDoubleValue(m.data.Gauge().DataPoints().At(i).DoubleValue() / aggCount)
+			}
+		}
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricSystemCPUFrequencyV1(cfg SystemCPUFrequencyV1MetricConfig) metricSystemCPUFrequencyV1 {
+	m := metricSystemCPUFrequencyV1{config: cfg}
 
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
@@ -402,15 +498,13 @@ type metricSystemCPUTimeV1 struct {
 func (m *metricSystemCPUTimeV1) init() {
 	m.data.SetName("system.cpu.time")
 	m.data.SetDescription("CPU time in milliseconds (new semantic conventions)")
-	m.data.SetUnit("ms")
-	m.data.SetEmptySum()
-	m.data.Sum().SetIsMonotonic(true)
-	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
-	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
+	m.data.SetUnit("s")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue string) {
+func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string, stateAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -418,15 +512,19 @@ func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcom
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
-	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeV1MetricAttributeKeyCpu) {
-		dp.Attributes().PutStr("cpu", cpuAttributeValue)
+	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeV1MetricAttributeKeyCPULogicalNumber) {
+		dp.Attributes().PutStr("cpu.logical_number", cpuLogicalNumberAttributeValue)
 	}
 	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeV1MetricAttributeKeyState) {
 		dp.Attributes().PutStr("state", stateAttributeValue)
 	}
+	if emitLegacyAttrs {
+		dp.Attributes().PutStr("cpu", cpuLogicalNumberAttributeValue)
+		dp.Attributes().PutStr("state", stateAttributeValue)
+	}
 
 	var s string
-	dps := m.data.Sum().DataPoints()
+	dps := m.data.Gauge().DataPoints()
 	for i := 0; i < dps.Len(); i++ {
 		dpi := dps.At(i)
 		if dp.Attributes().Equal(dpi.Attributes()) && dp.StartTimestamp() == dpi.StartTimestamp() && dp.Timestamp() == dpi.Timestamp() {
@@ -456,17 +554,17 @@ func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcom
 
 // updateCapacity saves max length of data point slices that will be used for the slice capacity.
 func (m *metricSystemCPUTimeV1) updateCapacity() {
-	if m.data.Sum().DataPoints().Len() > m.capacity {
-		m.capacity = m.data.Sum().DataPoints().Len()
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
 	}
 }
 
 // emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
 func (m *metricSystemCPUTimeV1) emit(metrics pmetric.MetricSlice) {
-	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
 		if m.config.AggregationStrategy == AggregationStrategyAvg {
 			for i, aggCount := range m.aggDataPoints {
-				m.data.Sum().DataPoints().At(i).SetDoubleValue(m.data.Sum().DataPoints().At(i).DoubleValue() / aggCount)
+				m.data.Gauge().DataPoints().At(i).SetDoubleValue(m.data.Gauge().DataPoints().At(i).DoubleValue() / aggCount)
 			}
 		}
 		m.updateCapacity()
@@ -586,6 +684,7 @@ type MetricsBuilder struct {
 	metricsBuffer                pmetric.Metrics      // accumulates metrics data before emitting.
 	buildInfo                    component.BuildInfo  // contains version information.
 	metricSystemCPUFrequency     metricSystemCPUFrequency
+	metricSystemCPUFrequencyV1   metricSystemCPUFrequencyV1
 	metricSystemCPULogicalCount  metricSystemCPULogicalCount
 	metricSystemCPUPhysicalCount metricSystemCPUPhysicalCount
 	metricSystemCPUTime          metricSystemCPUTime
@@ -611,8 +710,11 @@ func WithStartTime(startTime pcommon.Timestamp) MetricBuilderOption {
 	})
 }
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, options ...MetricBuilderOption) *MetricsBuilder {
+	if !mbc.Metrics.SystemCPUFrequency.enabledSetByUser {
+		settings.Logger.Warn("[WARNING] Please set `enabled` field explicitly for `system.cpu.frequency`: This metric will be disabled by default in a future release. Use system.cpu.frequency@v1 instead.")
+	}
 	if !mbc.Metrics.SystemCPUTime.enabledSetByUser {
-		settings.Logger.Warn("[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time/v1 instead.")
+		settings.Logger.Warn("[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time@v1 instead.")
 	}
 	mb := &MetricsBuilder{
 		config:                       mbc,
@@ -620,11 +722,34 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 		metricsBuffer:                pmetric.NewMetrics(),
 		buildInfo:                    settings.BuildInfo,
 		metricSystemCPUFrequency:     newMetricSystemCPUFrequency(mbc.Metrics.SystemCPUFrequency),
+		metricSystemCPUFrequencyV1:   newMetricSystemCPUFrequencyV1(mbc.Metrics.SystemCPUFrequencyV1),
 		metricSystemCPULogicalCount:  newMetricSystemCPULogicalCount(mbc.Metrics.SystemCPULogicalCount),
 		metricSystemCPUPhysicalCount: newMetricSystemCPUPhysicalCount(mbc.Metrics.SystemCPUPhysicalCount),
 		metricSystemCPUTime:          newMetricSystemCPUTime(mbc.Metrics.SystemCPUTime),
 		metricSystemCPUTimeV1:        newMetricSystemCPUTimeV1(mbc.Metrics.SystemCPUTimeV1),
 		metricSystemCPUUtilization:   newMetricSystemCPUUtilization(mbc.Metrics.SystemCPUUtilization),
+	}
+	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		if mb.metricSystemCPUFrequency.config.Enabled && mb.metricSystemCPUFrequencyV1.config.Enabled {
+			if mb.metricSystemCPUFrequency.data.Type() != mb.metricSystemCPUFrequencyV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
+				mb.metricSystemCPUFrequency.config.Enabled = false
+			}
+			// Disable legacy metric if legacy and latest have same name but different attributes
+			// The v1 metric will emit both attribute sets during migration
+			mb.metricSystemCPUFrequency.config.Enabled = false
+		}
+	}
+	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		if mb.metricSystemCPUTime.config.Enabled && mb.metricSystemCPUTimeV1.config.Enabled {
+			if mb.metricSystemCPUTime.data.Type() != mb.metricSystemCPUTimeV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
+				mb.metricSystemCPUTime.config.Enabled = false
+			}
+			// Disable legacy metric if legacy and latest have same name but different attributes
+			// The v1 metric will emit both attribute sets during migration
+			mb.metricSystemCPUTime.config.Enabled = false
+		}
 	}
 
 	for _, op := range options {
@@ -692,6 +817,7 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
 	mb.metricSystemCPUFrequency.emit(ils.Metrics())
+	mb.metricSystemCPUFrequencyV1.emit(ils.Metrics())
 	mb.metricSystemCPULogicalCount.emit(ils.Metrics())
 	mb.metricSystemCPUPhysicalCount.emit(ils.Metrics())
 	mb.metricSystemCPUTime.emit(ils.Metrics())
@@ -720,7 +846,18 @@ func (mb *MetricsBuilder) Emit(options ...ResourceMetricsOption) pmetric.Metrics
 
 // RecordSystemCPUFrequencyDataPoint adds a data point to system.cpu.frequency metric.
 func (mb *MetricsBuilder) RecordSystemCPUFrequencyDataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
-	mb.metricSystemCPUFrequency.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue)
+	// Dual-schema emission controlled by feature gates
+	if !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricSystemCPUFrequency.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue)
+	}
+	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricSystemCPUFrequencyV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled())
+	}
+}
+
+// RecordSystemCPUFrequencyV1DataPoint adds a data point to system.cpu.frequency@v1 metric.
+func (mb *MetricsBuilder) RecordSystemCPUFrequencyV1DataPoint(ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string) {
+	mb.metricSystemCPUFrequencyV1.recordDataPoint(mb.startTime, ts, val, cpuLogicalNumberAttributeValue, false)
 }
 
 // RecordSystemCPULogicalCountDataPoint adds a data point to system.cpu.logical.count metric.
@@ -735,12 +872,18 @@ func (mb *MetricsBuilder) RecordSystemCPUPhysicalCountDataPoint(ts pcommon.Times
 
 // RecordSystemCPUTimeDataPoint adds a data point to system.cpu.time metric.
 func (mb *MetricsBuilder) RecordSystemCPUTimeDataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue AttributeState) {
-	mb.metricSystemCPUTime.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
+	// Dual-schema emission controlled by feature gates
+	if !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricSystemCPUTime.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
+	}
+	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String(), !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled())
+	}
 }
 
 // RecordSystemCPUTimeV1DataPoint adds a data point to system.cpu.time@v1 metric.
-func (mb *MetricsBuilder) RecordSystemCPUTimeV1DataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue AttributeState) {
-	mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
+func (mb *MetricsBuilder) RecordSystemCPUTimeV1DataPoint(ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string, stateAttributeValue AttributeState) {
+	mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuLogicalNumberAttributeValue, stateAttributeValue.String(), false)
 }
 
 // RecordSystemCPUUtilizationDataPoint adds a data point to system.cpu.utilization metric.
