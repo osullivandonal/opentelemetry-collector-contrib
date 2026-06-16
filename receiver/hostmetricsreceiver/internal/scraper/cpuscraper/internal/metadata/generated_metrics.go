@@ -3,7 +3,9 @@
 package metadata
 
 import (
+	"regexp"
 	"slices"
+	"strconv"
 	"time"
 
 	"go.opentelemetry.io/collector/component"
@@ -11,6 +13,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper"
 	conventions "go.opentelemetry.io/otel/semconv/v1.9.0"
+	"go.uber.org/zap"
 )
 
 const (
@@ -19,6 +22,16 @@ const (
 	AggregationStrategyMin = "min"
 	AggregationStrategyMax = "max"
 )
+
+func mustParseInt64(s string) int64 {
+	re := regexp.MustCompile(`-?\d+`)
+	match := re.FindString(s)
+	if match == "" {
+		return 0
+	}
+	v, _ := strconv.ParseInt(match, 10, 64)
+	return v
+}
 
 // AttributeState specifies the value state attribute.
 type AttributeState int
@@ -72,10 +85,12 @@ var MapAttributeState = map[string]AttributeState{
 
 var MetricsInfo = metricsInfo{
 	SystemCPUFrequency: metricInfo{
-		Name: "system.cpu.frequency",
+		Name:       "system.cpu.frequency",
+		Attributes: []string{"cpu"},
 	},
 	SystemCPUFrequencyV1: metricInfo{
-		Name: "system.cpu.frequency",
+		Name:       "system.cpu.frequency",
+		Attributes: []string{"cpu.logical_number"},
 	},
 	SystemCPULogicalCount: metricInfo{
 		Name: "system.cpu.logical.count",
@@ -84,13 +99,16 @@ var MetricsInfo = metricsInfo{
 		Name: "system.cpu.physical.count",
 	},
 	SystemCPUTime: metricInfo{
-		Name: "system.cpu.time",
+		Name:       "system.cpu.time",
+		Attributes: []string{"cpu", "state"},
 	},
 	SystemCPUTimeV1: metricInfo{
-		Name: "system.cpu.time",
+		Name:       "system.cpu.time",
+		Attributes: []string{"cpu.logical_number", "state"},
 	},
 	SystemCPUUtilization: metricInfo{
-		Name: "system.cpu.utilization",
+		Name:       "system.cpu.utilization",
+		Attributes: []string{"cpu", "state"},
 	},
 }
 
@@ -105,7 +123,8 @@ type metricsInfo struct {
 }
 
 type metricInfo struct {
-	Name string
+	Name       string
+	Attributes []string
 }
 
 type metricSystemCPUFrequency struct {
@@ -214,7 +233,7 @@ func (m *metricSystemCPUFrequencyV1) init() {
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricSystemCPUFrequencyV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string, emitLegacyAttrs bool) {
+func (m *metricSystemCPUFrequencyV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue int64, cpuAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -223,10 +242,10 @@ func (m *metricSystemCPUFrequencyV1) recordDataPoint(start pcommon.Timestamp, ts
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	if slices.Contains(m.config.EnabledAttributes, SystemCPUFrequencyV1MetricAttributeKeyCPULogicalNumber) {
-		dp.Attributes().PutStr("cpu.logical_number", cpuLogicalNumberAttributeValue)
+		dp.Attributes().PutInt("cpu.logical_number", cpuLogicalNumberAttributeValue)
 	}
 	if emitLegacyAttrs {
-		dp.Attributes().PutStr("cpu", cpuLogicalNumberAttributeValue)
+		dp.Attributes().PutStr("cpu", cpuAttributeValue)
 	}
 
 	var s string
@@ -504,7 +523,7 @@ func (m *metricSystemCPUTimeV1) init() {
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string, stateAttributeValue string, emitLegacyAttrs bool) {
+func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue int64, stateAttributeValue string, cpuAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -513,13 +532,13 @@ func (m *metricSystemCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcom
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
 	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeV1MetricAttributeKeyCPULogicalNumber) {
-		dp.Attributes().PutStr("cpu.logical_number", cpuLogicalNumberAttributeValue)
+		dp.Attributes().PutInt("cpu.logical_number", cpuLogicalNumberAttributeValue)
 	}
 	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeV1MetricAttributeKeyState) {
 		dp.Attributes().PutStr("state", stateAttributeValue)
 	}
 	if emitLegacyAttrs {
-		dp.Attributes().PutStr("cpu", cpuLogicalNumberAttributeValue)
+		dp.Attributes().PutStr("cpu", cpuAttributeValue)
 		dp.Attributes().PutStr("state", stateAttributeValue)
 	}
 
@@ -729,26 +748,56 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 		metricSystemCPUTimeV1:        newMetricSystemCPUTimeV1(mbc.Metrics.SystemCPUTimeV1),
 		metricSystemCPUUtilization:   newMetricSystemCPUUtilization(mbc.Metrics.SystemCPUUtilization),
 	}
-	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
+	if ScraperCPUEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricSystemCPUFrequency.config.Enabled && mb.metricSystemCPUFrequencyV1.config.Enabled {
+			var disable bool
 			if mb.metricSystemCPUFrequency.data.Type() != mb.metricSystemCPUFrequencyV1.data.Type() {
 				// Disable legacy metric if legacy and latest have same name but different types
+				disable = true
+				settings.Logger.Warn("[WARNING] Legacy metric `system.cpu.frequency` disabled: same emitted name as `system.cpu.frequency@v1` with different type; only latest will be emitted")
+			}
+			if !slices.Equal(MetricsInfo.SystemCPUFrequency.Attributes, MetricsInfo.SystemCPUFrequencyV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
+				disable = true
+				settings.Logger.Warn("[WARNING] Legacy metric `system.cpu.frequency` disabled: same emitted name as `system.cpu.frequency@v1` with different attributes; only latest will be emitted with combined attributes",
+					zap.Strings("legacy_attributes", MetricsInfo.SystemCPUFrequency.Attributes),
+					zap.Strings("latest_attributes", MetricsInfo.SystemCPUFrequencyV1.Attributes))
+			}
+			if disable {
 				mb.metricSystemCPUFrequency.config.Enabled = false
 			}
-			// Disable legacy metric if legacy and latest have same name but different attributes
-			// The v1 metric will emit both attribute sets during migration
-			mb.metricSystemCPUFrequency.config.Enabled = false
+		}
+	} else {
+		if !ScraperCPUEmitV1SystemConventionsFeatureGate.IsEnabled() && mb.metricSystemCPUFrequencyV1.config.Enabled {
+			mb.metricSystemCPUFrequencyV1.config.Enabled = false
+			settings.Logger.Warn("[WARNING] metric `system.cpu.frequency@v1` requires feature gate `scraper.cpu.EmitV1SystemConventions` to be enabled, metric has been disabled")
 		}
 	}
-	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
+	if ScraperCPUEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricSystemCPUTime.config.Enabled && mb.metricSystemCPUTimeV1.config.Enabled {
+			var disable bool
 			if mb.metricSystemCPUTime.data.Type() != mb.metricSystemCPUTimeV1.data.Type() {
 				// Disable legacy metric if legacy and latest have same name but different types
+				disable = true
+				settings.Logger.Warn("[WARNING] Legacy metric `system.cpu.time` disabled: same emitted name as `system.cpu.time@v1` with different type; only latest will be emitted")
+			}
+			if !slices.Equal(MetricsInfo.SystemCPUTime.Attributes, MetricsInfo.SystemCPUTimeV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
+				disable = true
+				settings.Logger.Warn("[WARNING] Legacy metric `system.cpu.time` disabled: same emitted name as `system.cpu.time@v1` with different attributes; only latest will be emitted with combined attributes",
+					zap.Strings("legacy_attributes", MetricsInfo.SystemCPUTime.Attributes),
+					zap.Strings("latest_attributes", MetricsInfo.SystemCPUTimeV1.Attributes))
+			}
+			if disable {
 				mb.metricSystemCPUTime.config.Enabled = false
 			}
-			// Disable legacy metric if legacy and latest have same name but different attributes
-			// The v1 metric will emit both attribute sets during migration
-			mb.metricSystemCPUTime.config.Enabled = false
+		}
+	} else {
+		if !ScraperCPUEmitV1SystemConventionsFeatureGate.IsEnabled() && mb.metricSystemCPUTimeV1.config.Enabled {
+			mb.metricSystemCPUTimeV1.config.Enabled = false
+			settings.Logger.Warn("[WARNING] metric `system.cpu.time@v1` requires feature gate `scraper.cpu.EmitV1SystemConventions` to be enabled, metric has been disabled")
 		}
 	}
 
@@ -847,17 +896,12 @@ func (mb *MetricsBuilder) Emit(options ...ResourceMetricsOption) pmetric.Metrics
 // RecordSystemCPUFrequencyDataPoint adds a data point to system.cpu.frequency metric.
 func (mb *MetricsBuilder) RecordSystemCPUFrequencyDataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string) {
 	// Dual-schema emission controlled by feature gates
-	if !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
+	if !ScraperCPUDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
 		mb.metricSystemCPUFrequency.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue)
 	}
-	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
-		mb.metricSystemCPUFrequencyV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled())
+	if ScraperCPUEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricSystemCPUFrequencyV1.recordDataPoint(mb.startTime, ts, val, mustParseInt64(cpuAttributeValue), cpuAttributeValue, true)
 	}
-}
-
-// RecordSystemCPUFrequencyV1DataPoint adds a data point to system.cpu.frequency@v1 metric.
-func (mb *MetricsBuilder) RecordSystemCPUFrequencyV1DataPoint(ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string) {
-	mb.metricSystemCPUFrequencyV1.recordDataPoint(mb.startTime, ts, val, cpuLogicalNumberAttributeValue, false)
 }
 
 // RecordSystemCPULogicalCountDataPoint adds a data point to system.cpu.logical.count metric.
@@ -873,17 +917,12 @@ func (mb *MetricsBuilder) RecordSystemCPUPhysicalCountDataPoint(ts pcommon.Times
 // RecordSystemCPUTimeDataPoint adds a data point to system.cpu.time metric.
 func (mb *MetricsBuilder) RecordSystemCPUTimeDataPoint(ts pcommon.Timestamp, val float64, cpuAttributeValue string, stateAttributeValue AttributeState) {
 	// Dual-schema emission controlled by feature gates
-	if !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
+	if !ScraperCPUDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
 		mb.metricSystemCPUTime.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String())
 	}
-	if ReceiverHostmetricsEmitV1SystemConventionsFeatureGate.IsEnabled() {
-		mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuAttributeValue, stateAttributeValue.String(), !ReceiverHostmetricsDontEmitV0SystemConventionsFeatureGate.IsEnabled())
+	if ScraperCPUEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, mustParseInt64(cpuAttributeValue), stateAttributeValue.String(), cpuAttributeValue, true)
 	}
-}
-
-// RecordSystemCPUTimeV1DataPoint adds a data point to system.cpu.time@v1 metric.
-func (mb *MetricsBuilder) RecordSystemCPUTimeV1DataPoint(ts pcommon.Timestamp, val float64, cpuLogicalNumberAttributeValue string, stateAttributeValue AttributeState) {
-	mb.metricSystemCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuLogicalNumberAttributeValue, stateAttributeValue.String(), false)
 }
 
 // RecordSystemCPUUtilizationDataPoint adds a data point to system.cpu.utilization metric.

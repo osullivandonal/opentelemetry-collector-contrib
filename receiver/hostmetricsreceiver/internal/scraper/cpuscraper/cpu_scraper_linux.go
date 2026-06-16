@@ -26,17 +26,6 @@ func (s *cpuScraper) recordCPUTimeStateDataPoints(now pcommon.Timestamp, cpuTime
 	s.mb.RecordSystemCPUTimeDataPoint(now, cpuTime.Iowait, cpuTime.CPU, metadata.AttributeStateWait)
 }
 
-func (s *cpuScraper) recordCPUTimeV1StateDataPoints(now pcommon.Timestamp, cpuTime cpu.TimesStat) {
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.User*1000, cpuTime.CPU, metadata.AttributeStateUser)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.System*1000, cpuTime.CPU, metadata.AttributeStateSystem)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.Idle*1000, cpuTime.CPU, metadata.AttributeStateIdle)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.Irq*1000, cpuTime.CPU, metadata.AttributeStateInterrupt)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.Nice*1000, cpuTime.CPU, metadata.AttributeStateNice)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.Softirq*1000, cpuTime.CPU, metadata.AttributeStateSoftirq)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.Steal*1000, cpuTime.CPU, metadata.AttributeStateSteal)
-	s.mb.RecordSystemCPUTimeV1DataPoint(now, cpuTime.Iowait*1000, cpuTime.CPU, metadata.AttributeStateWait)
-}
-
 func (s *cpuScraper) recordCPUUtilization(now pcommon.Timestamp, cpuUtilization ucal.CPUUtilization) {
 	s.mb.RecordSystemCPUUtilizationDataPoint(now, cpuUtilization.User, cpuUtilization.CPU, metadata.AttributeStateUser)
 	s.mb.RecordSystemCPUUtilizationDataPoint(now, cpuUtilization.System, cpuUtilization.CPU, metadata.AttributeStateSystem)

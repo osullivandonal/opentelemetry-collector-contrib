@@ -58,10 +58,24 @@ func TestMetricsBuilder(t *testing.T) {
 			observedZapCore, observedLogs := observer.New(zap.WarnLevel)
 			settings := scrapertest.NewNopSettings(scrapertest.NopType)
 			settings.Logger = zap.New(observedZapCore)
+			if tt.name == "all_set" {
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"scraper.cpu.EmitV1SystemConventions", true))
+				t.Cleanup(func() {
+					featuregate.GlobalRegistry().Set("scraper.cpu.EmitV1SystemConventions", false)
+				})
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"scraper.cpu.EmitV1SystemConventions", true))
+				t.Cleanup(func() {
+					featuregate.GlobalRegistry().Set("scraper.cpu.EmitV1SystemConventions", false)
+				})
+			}
 			mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, tt.name), settings, WithStartTime(start))
 			aggMap := make(map[string]string) // contains the aggregation strategies for each metric name
 			aggMap["system.cpu.frequency"] = mb.metricSystemCPUFrequency.config.AggregationStrategy
+			aggMap["system.cpu.frequency@v1"] = mb.metricSystemCPUFrequencyV1.config.AggregationStrategy
 			aggMap["system.cpu.time"] = mb.metricSystemCPUTime.config.AggregationStrategy
+			aggMap["system.cpu.time@v1"] = mb.metricSystemCPUTimeV1.config.AggregationStrategy
 			aggMap["system.cpu.utilization"] = mb.metricSystemCPUUtilization.config.AggregationStrategy
 
 			expectedWarnings := 0
@@ -73,17 +87,21 @@ func TestMetricsBuilder(t *testing.T) {
 				assert.Equal(t, "[WARNING] Please set `enabled` field explicitly for `system.cpu.time`: This metric will be disabled by default in a future release. Use system.cpu.time@v1 instead.", observedLogs.All()[expectedWarnings].Message)
 				expectedWarnings++
 			}
+			if tt.name == "all_set" {
+				expectedWarnings++ // attributes differ
+				expectedWarnings++ // type differs
+				expectedWarnings++ // attributes differ
+			}
 			if tt.metricsSet != testDataSetReag {
 				assert.Equal(t, expectedWarnings, observedLogs.Len())
 			}
 
 			defaultMetricsCount := 0
 			allMetricsCount := 0
+			if tt.name != "all_set" {
 
-			allMetricsCount++
-			mb.RecordSystemCPUFrequencyDataPoint(ts, 1, "cpu-val")
-			if tt.name == "reaggregate_set" {
-				mb.RecordSystemCPUFrequencyDataPoint(ts, 3, "cpu-val-2")
+				allMetricsCount++
+				mb.RecordSystemCPUFrequencyDataPoint(ts, 1, "cpu-val")
 			}
 
 			allMetricsCount++
@@ -91,11 +109,10 @@ func TestMetricsBuilder(t *testing.T) {
 
 			allMetricsCount++
 			mb.RecordSystemCPUPhysicalCountDataPoint(ts, 1)
-			defaultMetricsCount++
-			allMetricsCount++
-			mb.RecordSystemCPUTimeDataPoint(ts, 1, "cpu-val", AttributeStateIdle)
-			if tt.name == "reaggregate_set" {
-				mb.RecordSystemCPUTimeDataPoint(ts, 3, "cpu-val-2", AttributeStateInterrupt)
+			if tt.name != "all_set" {
+				defaultMetricsCount++
+				allMetricsCount++
+				mb.RecordSystemCPUTimeDataPoint(ts, 1, "cpu-val", AttributeStateIdle)
 			}
 
 			allMetricsCount++
@@ -139,46 +156,6 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for _, mi := range allMetricsList {
 				switch mi.Name() {
-				case "system.cpu.frequency":
-					if tt.name != "reaggregate_set" {
-						assert.False(t, validatedMetrics["system.cpu.frequency"], "Found a duplicate in the metrics slice: system.cpu.frequency")
-						validatedMetrics["system.cpu.frequency"] = true
-						assert.Equal(t, pmetric.MetricTypeGauge, mi.Type())
-						assert.Equal(t, 1, mi.Gauge().DataPoints().Len())
-						assert.Equal(t, "Current frequency of the CPU core in Hz.", mi.Description())
-						assert.Equal(t, "Hz", mi.Unit())
-						dp := mi.Gauge().DataPoints().At(0)
-						assert.Equal(t, start, dp.StartTimestamp())
-						assert.Equal(t, ts, dp.Timestamp())
-						assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-						assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
-						cpuAttrVal, ok := dp.Attributes().Get("cpu")
-						assert.True(t, ok)
-						assert.Equal(t, "cpu-val", cpuAttrVal.Str())
-					} else {
-						assert.False(t, validatedMetrics["system.cpu.frequency"], "Found a duplicate in the metrics slice: system.cpu.frequency")
-						validatedMetrics["system.cpu.frequency"] = true
-						assert.Equal(t, pmetric.MetricTypeGauge, mi.Type())
-						assert.Equal(t, 1, mi.Gauge().DataPoints().Len())
-						assert.Equal(t, "Current frequency of the CPU core in Hz.", mi.Description())
-						assert.Equal(t, "Hz", mi.Unit())
-						dp := mi.Gauge().DataPoints().At(0)
-						assert.Equal(t, start, dp.StartTimestamp())
-						assert.Equal(t, ts, dp.Timestamp())
-						assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-						switch aggMap["system.cpu.frequency"] {
-						case "sum":
-							assert.InDelta(t, float64(4), dp.DoubleValue(), 0.01)
-						case "avg":
-							assert.InDelta(t, float64(2), dp.DoubleValue(), 0.01)
-						case "min":
-							assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
-						case "max":
-							assert.InDelta(t, float64(3), dp.DoubleValue(), 0.01)
-						}
-						_, ok := dp.Attributes().Get("cpu")
-						assert.False(t, ok)
-					}
 				case "system.cpu.logical.count":
 					assert.False(t, validatedMetrics["system.cpu.logical.count"], "Found a duplicate in the metrics slice: system.cpu.logical.count")
 					validatedMetrics["system.cpu.logical.count"] = true
@@ -207,55 +184,6 @@ func TestMetricsBuilder(t *testing.T) {
 					assert.Equal(t, ts, dp.Timestamp())
 					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
 					assert.Equal(t, int64(1), dp.IntValue())
-				case "system.cpu.time":
-					if tt.name != "reaggregate_set" {
-						assert.False(t, validatedMetrics["system.cpu.time"], "Found a duplicate in the metrics slice: system.cpu.time")
-						validatedMetrics["system.cpu.time"] = true
-						assert.Equal(t, pmetric.MetricTypeSum, mi.Type())
-						assert.Equal(t, 1, mi.Sum().DataPoints().Len())
-						assert.Equal(t, "Total seconds each logical CPU spent on each mode.", mi.Description())
-						assert.Equal(t, "s", mi.Unit())
-						assert.True(t, mi.Sum().IsMonotonic())
-						assert.Equal(t, pmetric.AggregationTemporalityCumulative, mi.Sum().AggregationTemporality())
-						dp := mi.Sum().DataPoints().At(0)
-						assert.Equal(t, start, dp.StartTimestamp())
-						assert.Equal(t, ts, dp.Timestamp())
-						assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-						assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
-						cpuAttrVal, ok := dp.Attributes().Get("cpu")
-						assert.True(t, ok)
-						assert.Equal(t, "cpu-val", cpuAttrVal.Str())
-						stateAttrVal, ok := dp.Attributes().Get("state")
-						assert.True(t, ok)
-						assert.Equal(t, "idle", stateAttrVal.Str())
-					} else {
-						assert.False(t, validatedMetrics["system.cpu.time"], "Found a duplicate in the metrics slice: system.cpu.time")
-						validatedMetrics["system.cpu.time"] = true
-						assert.Equal(t, pmetric.MetricTypeSum, mi.Type())
-						assert.Equal(t, 1, mi.Sum().DataPoints().Len())
-						assert.Equal(t, "Total seconds each logical CPU spent on each mode.", mi.Description())
-						assert.Equal(t, "s", mi.Unit())
-						assert.True(t, mi.Sum().IsMonotonic())
-						assert.Equal(t, pmetric.AggregationTemporalityCumulative, mi.Sum().AggregationTemporality())
-						dp := mi.Sum().DataPoints().At(0)
-						assert.Equal(t, start, dp.StartTimestamp())
-						assert.Equal(t, ts, dp.Timestamp())
-						assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
-						switch aggMap["system.cpu.time"] {
-						case "sum":
-							assert.InDelta(t, float64(4), dp.DoubleValue(), 0.01)
-						case "avg":
-							assert.InDelta(t, float64(2), dp.DoubleValue(), 0.01)
-						case "min":
-							assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
-						case "max":
-							assert.InDelta(t, float64(3), dp.DoubleValue(), 0.01)
-						}
-						_, ok := dp.Attributes().Get("cpu")
-						assert.False(t, ok)
-						_, ok = dp.Attributes().Get("state")
-						assert.False(t, ok)
-					}
 				case "system.cpu.utilization":
 					if tt.name != "reaggregate_set" {
 						assert.False(t, validatedMetrics["system.cpu.utilization"], "Found a duplicate in the metrics slice: system.cpu.utilization")
@@ -306,7 +234,6 @@ func TestMetricsBuilder(t *testing.T) {
 		})
 	}
 }
-
 func TestVersionedMetrics(t *testing.T) {
 	t.Run("system.cpu.frequency", func(t *testing.T) {
 		tests := []struct {
@@ -346,12 +273,12 @@ func TestVersionedMetrics(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				require.NoError(t, featuregate.GlobalRegistry().Set(
-					"receiver.hostmetrics.DontEmitV0SystemConventions", tt.disableOld))
+					"scraper.cpu.DontEmitV0SystemConventions", tt.disableOld))
 				require.NoError(t, featuregate.GlobalRegistry().Set(
-					"receiver.hostmetrics.EmitV1SystemConventions", tt.enableNew))
+					"scraper.cpu.EmitV1SystemConventions", tt.enableNew))
 				t.Cleanup(func() {
-					featuregate.GlobalRegistry().Set("receiver.hostmetrics.DontEmitV0SystemConventions", false)
-					featuregate.GlobalRegistry().Set("receiver.hostmetrics.EmitV1SystemConventions", false)
+					featuregate.GlobalRegistry().Set("scraper.cpu.DontEmitV0SystemConventions", false)
+					featuregate.GlobalRegistry().Set("scraper.cpu.EmitV1SystemConventions", false)
 				})
 
 				start := pcommon.Timestamp(1_000_000_000)
@@ -377,8 +304,8 @@ func TestVersionedMetrics(t *testing.T) {
 								// Has v1-specific attribute - this is the new metric
 								newFound = true
 								if tt.expectLegacyAttrs {
-									_, hasCpu := dp.Attributes().Get("cpu")
-									assert.True(t, hasCpu, "expected legacy attr cpu")
+									_, hasCPU := dp.Attributes().Get("cpu")
+									assert.True(t, hasCPU, "expected legacy attr cpu")
 								}
 							} else {
 								// No v1-specific attribute - this is the legacy metric
@@ -430,12 +357,12 @@ func TestVersionedMetrics(t *testing.T) {
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
 				require.NoError(t, featuregate.GlobalRegistry().Set(
-					"receiver.hostmetrics.DontEmitV0SystemConventions", tt.disableOld))
+					"scraper.cpu.DontEmitV0SystemConventions", tt.disableOld))
 				require.NoError(t, featuregate.GlobalRegistry().Set(
-					"receiver.hostmetrics.EmitV1SystemConventions", tt.enableNew))
+					"scraper.cpu.EmitV1SystemConventions", tt.enableNew))
 				t.Cleanup(func() {
-					featuregate.GlobalRegistry().Set("receiver.hostmetrics.DontEmitV0SystemConventions", false)
-					featuregate.GlobalRegistry().Set("receiver.hostmetrics.EmitV1SystemConventions", false)
+					featuregate.GlobalRegistry().Set("scraper.cpu.DontEmitV0SystemConventions", false)
+					featuregate.GlobalRegistry().Set("scraper.cpu.EmitV1SystemConventions", false)
 				})
 
 				start := pcommon.Timestamp(1_000_000_000)
@@ -462,8 +389,8 @@ func TestVersionedMetrics(t *testing.T) {
 								newFound = true
 								if tt.expectLegacyAttrs {
 									dp := m.Gauge().DataPoints().At(0)
-									_, hasCpu := dp.Attributes().Get("cpu")
-									assert.True(t, hasCpu, "expected legacy attr cpu")
+									_, hasCPU := dp.Attributes().Get("cpu")
+									assert.True(t, hasCPU, "expected legacy attr cpu")
 									_, hasState := dp.Attributes().Get("state")
 									assert.True(t, hasState, "expected legacy attr state")
 								}
