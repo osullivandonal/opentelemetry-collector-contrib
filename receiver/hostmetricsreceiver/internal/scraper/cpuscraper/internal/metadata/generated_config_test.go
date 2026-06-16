@@ -29,7 +29,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					SystemCPUFrequency: SystemCPUFrequencyMetricConfig{
 						Enabled:             true,
 						AggregationStrategy: AggregationStrategyAvg,
-						EnabledAttributes:   []SystemCPUFrequencyMetricAttributeKey{SystemCPUFrequencyMetricAttributeKeyCpu},
+						EnabledAttributes:   []SystemCPUFrequencyMetricAttributeKey{SystemCPUFrequencyMetricAttributeKeyCPU},
 					},
 					SystemCPUFrequencyV1: SystemCPUFrequencyV1MetricConfig{
 						Enabled:             true,
@@ -45,7 +45,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					SystemCPUTime: SystemCPUTimeMetricConfig{
 						Enabled:             true,
 						AggregationStrategy: AggregationStrategySum,
-						EnabledAttributes:   []SystemCPUTimeMetricAttributeKey{SystemCPUTimeMetricAttributeKeyCpu, SystemCPUTimeMetricAttributeKeyState},
+						EnabledAttributes:   []SystemCPUTimeMetricAttributeKey{SystemCPUTimeMetricAttributeKeyCPU, SystemCPUTimeMetricAttributeKeyState},
 					},
 					SystemCPUTimeV1: SystemCPUTimeV1MetricConfig{
 						Enabled:             true,
@@ -55,7 +55,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					SystemCPUUtilization: SystemCPUUtilizationMetricConfig{
 						Enabled:             true,
 						AggregationStrategy: AggregationStrategyAvg,
-						EnabledAttributes:   []SystemCPUUtilizationMetricAttributeKey{SystemCPUUtilizationMetricAttributeKeyCpu, SystemCPUUtilizationMetricAttributeKeyState},
+						EnabledAttributes:   []SystemCPUUtilizationMetricAttributeKey{SystemCPUUtilizationMetricAttributeKeyCPU, SystemCPUUtilizationMetricAttributeKeyState},
 					},
 				},
 			},
@@ -67,7 +67,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					SystemCPUFrequency: SystemCPUFrequencyMetricConfig{
 						Enabled:             false,
 						AggregationStrategy: AggregationStrategyAvg,
-						EnabledAttributes:   []SystemCPUFrequencyMetricAttributeKey{SystemCPUFrequencyMetricAttributeKeyCpu},
+						EnabledAttributes:   []SystemCPUFrequencyMetricAttributeKey{SystemCPUFrequencyMetricAttributeKeyCPU},
 					},
 					SystemCPUFrequencyV1: SystemCPUFrequencyV1MetricConfig{
 						Enabled:             false,
@@ -83,7 +83,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					SystemCPUTime: SystemCPUTimeMetricConfig{
 						Enabled:             false,
 						AggregationStrategy: AggregationStrategySum,
-						EnabledAttributes:   []SystemCPUTimeMetricAttributeKey{SystemCPUTimeMetricAttributeKeyCpu, SystemCPUTimeMetricAttributeKeyState},
+						EnabledAttributes:   []SystemCPUTimeMetricAttributeKey{SystemCPUTimeMetricAttributeKeyCPU, SystemCPUTimeMetricAttributeKeyState},
 					},
 					SystemCPUTimeV1: SystemCPUTimeV1MetricConfig{
 						Enabled:             false,
@@ -93,7 +93,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 					SystemCPUUtilization: SystemCPUUtilizationMetricConfig{
 						Enabled:             false,
 						AggregationStrategy: AggregationStrategyAvg,
-						EnabledAttributes:   []SystemCPUUtilizationMetricAttributeKey{SystemCPUUtilizationMetricAttributeKeyCpu, SystemCPUUtilizationMetricAttributeKeyState},
+						EnabledAttributes:   []SystemCPUUtilizationMetricAttributeKey{SystemCPUUtilizationMetricAttributeKeyCPU, SystemCPUUtilizationMetricAttributeKeyState},
 					},
 				},
 			},

@@ -133,7 +133,7 @@ func (m *metricSystemCPUFrequency) recordDataPoint(start pcommon.Timestamp, ts p
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
-	if slices.Contains(m.config.EnabledAttributes, SystemCPUFrequencyMetricAttributeKeyCpu) {
+	if slices.Contains(m.config.EnabledAttributes, SystemCPUFrequencyMetricAttributeKeyCPU) {
 		dp.Attributes().PutStr("cpu", cpuAttributeValue)
 	}
 
@@ -420,7 +420,7 @@ func (m *metricSystemCPUTime) recordDataPoint(start pcommon.Timestamp, ts pcommo
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
-	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeMetricAttributeKeyCpu) {
+	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeMetricAttributeKeyCPU) {
 		dp.Attributes().PutStr("cpu", cpuAttributeValue)
 	}
 	if slices.Contains(m.config.EnabledAttributes, SystemCPUTimeMetricAttributeKeyState) {
@@ -608,7 +608,7 @@ func (m *metricSystemCPUUtilization) recordDataPoint(start pcommon.Timestamp, ts
 	dp := pmetric.NewNumberDataPoint()
 	dp.SetStartTimestamp(start)
 	dp.SetTimestamp(ts)
-	if slices.Contains(m.config.EnabledAttributes, SystemCPUUtilizationMetricAttributeKeyCpu) {
+	if slices.Contains(m.config.EnabledAttributes, SystemCPUUtilizationMetricAttributeKeyCPU) {
 		dp.Attributes().PutStr("cpu", cpuAttributeValue)
 	}
 	if slices.Contains(m.config.EnabledAttributes, SystemCPUUtilizationMetricAttributeKeyState) {

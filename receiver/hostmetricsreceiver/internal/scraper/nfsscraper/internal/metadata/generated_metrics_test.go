@@ -77,9 +77,9 @@ func TestMetricsBuilder(t *testing.T) {
 			allMetricsCount := 0
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordNfsClientNetCountDataPoint(ts, 1, AttributeNetworkTransportUdp)
+			mb.RecordNfsClientNetCountDataPoint(ts, 1, AttributeNetworkTransportUDP)
 			if tt.name == "reaggregate_set" {
-				mb.RecordNfsClientNetCountDataPoint(ts, 3, AttributeNetworkTransportTcp)
+				mb.RecordNfsClientNetCountDataPoint(ts, 3, AttributeNetworkTransportTCP)
 			}
 			defaultMetricsCount++
 			allMetricsCount++
@@ -116,9 +116,9 @@ func TestMetricsBuilder(t *testing.T) {
 			}
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordNfsServerNetCountDataPoint(ts, 1, AttributeNetworkTransportUdp)
+			mb.RecordNfsServerNetCountDataPoint(ts, 1, AttributeNetworkTransportUDP)
 			if tt.name == "reaggregate_set" {
-				mb.RecordNfsServerNetCountDataPoint(ts, 3, AttributeNetworkTransportTcp)
+				mb.RecordNfsServerNetCountDataPoint(ts, 3, AttributeNetworkTransportTCP)
 			}
 			defaultMetricsCount++
 			allMetricsCount++
