@@ -31,6 +31,11 @@ func TestMetricsBuilderConfig(t *testing.T) {
 						AggregationStrategy: AggregationStrategySum,
 						EnabledAttributes:   []ProcessContextSwitchesMetricAttributeKey{ProcessContextSwitchesMetricAttributeKeyContextSwitchType},
 					},
+					ProcessContextSwitchesV1: ProcessContextSwitchesV1MetricConfig{
+						Enabled:             true,
+						AggregationStrategy: AggregationStrategySum,
+						EnabledAttributes:   []ProcessContextSwitchesV1MetricAttributeKey{ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1},
+					},
 					ProcessCPUTime: ProcessCPUTimeMetricConfig{
 						Enabled:             true,
 						AggregationStrategy: AggregationStrategySum,
@@ -102,6 +107,11 @@ func TestMetricsBuilderConfig(t *testing.T) {
 						AggregationStrategy: AggregationStrategySum,
 						EnabledAttributes:   []ProcessContextSwitchesMetricAttributeKey{ProcessContextSwitchesMetricAttributeKeyContextSwitchType},
 					},
+					ProcessContextSwitchesV1: ProcessContextSwitchesV1MetricConfig{
+						Enabled:             false,
+						AggregationStrategy: AggregationStrategySum,
+						EnabledAttributes:   []ProcessContextSwitchesV1MetricAttributeKey{ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1},
+					},
 					ProcessCPUTime: ProcessCPUTimeMetricConfig{
 						Enabled:             false,
 						AggregationStrategy: AggregationStrategySum,
@@ -168,7 +178,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := loadMetricsBuilderConfig(t, tt.name)
-			diff := cmp.Diff(tt.want, cfg, cmpopts.IgnoreUnexported(ProcessContextSwitchesMetricConfig{}, ProcessCPUTimeMetricConfig{}, ProcessCPUUtilizationMetricConfig{}, ProcessDiskIoMetricConfig{}, ProcessDiskOperationsMetricConfig{}, ProcessHandlesMetricConfig{}, ProcessMemoryUsageMetricConfig{}, ProcessMemoryUtilizationMetricConfig{}, ProcessMemoryVirtualMetricConfig{}, ProcessOpenFileDescriptorsMetricConfig{}, ProcessPagingFaultsMetricConfig{}, ProcessSignalsPendingMetricConfig{}, ProcessThreadsMetricConfig{}, ProcessUptimeMetricConfig{}, ResourceAttributeConfig{}))
+			diff := cmp.Diff(tt.want, cfg, cmpopts.IgnoreUnexported(ProcessContextSwitchesMetricConfig{}, ProcessContextSwitchesV1MetricConfig{}, ProcessCPUTimeMetricConfig{}, ProcessCPUUtilizationMetricConfig{}, ProcessDiskIoMetricConfig{}, ProcessDiskOperationsMetricConfig{}, ProcessHandlesMetricConfig{}, ProcessMemoryUsageMetricConfig{}, ProcessMemoryUtilizationMetricConfig{}, ProcessMemoryVirtualMetricConfig{}, ProcessOpenFileDescriptorsMetricConfig{}, ProcessPagingFaultsMetricConfig{}, ProcessSignalsPendingMetricConfig{}, ProcessThreadsMetricConfig{}, ProcessUptimeMetricConfig{}, ResourceAttributeConfig{}))
 			require.Emptyf(t, diff, "Config mismatch (-expected +actual):\n%s", diff)
 		})
 	}
@@ -181,6 +191,18 @@ func TestProcessContextSwitchesMetricsConfig_Validate(t *testing.T) {
 	require.ErrorContains(t, cfg.Validate(), "metric process.context_switches doesn't have an attribute invalid, valid attributes: [type]")
 
 	cfg = DefaultMetricsConfig().ProcessContextSwitches
+	cfg.AggregationStrategy = "invalid"
+	require.ErrorContains(t, cfg.Validate(), "invalid aggregation strategy")
+}
+
+func TestProcessContextSwitchesV1MetricsConfig_Validate(t *testing.T) {
+	cfg := DefaultMetricsConfig().ProcessContextSwitchesV1
+	require.NoError(t, cfg.Validate())
+
+	cfg.EnabledAttributes = []ProcessContextSwitchesV1MetricAttributeKey{"invalid"}
+	require.ErrorContains(t, cfg.Validate(), "metric process.context_switches@v1 doesn't have an attribute invalid, valid attributes: [type]")
+
+	cfg = DefaultMetricsConfig().ProcessContextSwitchesV1
 	cfg.AggregationStrategy = "invalid"
 	require.ErrorContains(t, cfg.Validate(), "invalid aggregation strategy")
 }

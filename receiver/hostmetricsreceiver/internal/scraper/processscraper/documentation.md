@@ -76,11 +76,37 @@ This metric is only available on Linux.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {count} | Sum | Int | Cumulative | true | Development |
 
+#### Migration
+
+- Target Metric: `process.context_switches@v1`
+- Disable Old Gate: `scraper.process.DontEmitV0SystemConventions`
+- Enable New Gate: `scraper.process.EmitV1SystemConventions`
+
+When the disable-old gate is enabled, emission of this metric is suppressed. When the enable-new gate is enabled, the target metric is emitted. If both gates are disabled, only this metric is emitted; if both are enabled, only the target metric is emitted.
+
 #### Attributes
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
 | type | Type of context switched. | Str: ``involuntary``, ``voluntary`` | Recommended | - |
+
+### process.context_switches@v1
+
+Number of times the process has been context switched.
+
+This metric is only available on Linux.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| {context_switch} | Sum | Int | Cumulative | true | Stable |
+
+Emitted Name: `process.context_switches`
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| type | Specifies whether the context switches for this data point were voluntary or involuntary. | Str: ``involuntary``, ``voluntary`` | Recommended | - |
 
 ### process.cpu.utilization
 
@@ -192,3 +218,14 @@ The time the process has been running.
 | process.owner | The username of the user that owns the process. | Any Str | true | - |
 | process.parent_pid | Parent Process identifier (PPID). | Any Int | true | - |
 | process.pid | Process identifier (PID). | Any Int | true | - |
+
+## Feature Gates
+
+This component has the following feature gates:
+
+| Feature Gate | Stage | Description | From Version | To Version | Reference |
+| ------------ | ----- | ----------- | ------------ | ---------- | --------- |
+| `scraper.process.DontEmitV0SystemConventions` | alpha | When enabled, semconv legacy attributes are disabled. | v0.154.0 | N/A | [Link](https://github.com/open-telemetry/semantic-conventions/issues/3041) |
+| `scraper.process.EmitV1SystemConventions` | alpha | When enabled, semconv stable attributes are enabled. | v0.154.0 | N/A | [Link](https://github.com/open-telemetry/semantic-conventions/issues/3041) |
+
+For more information about feature gates, see the [Feature Gates](https://github.com/open-telemetry/opentelemetry-collector/blob/main/featuregate/README.md) documentation.

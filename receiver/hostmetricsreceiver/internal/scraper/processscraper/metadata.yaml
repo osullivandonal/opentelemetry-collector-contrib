@@ -8,7 +8,19 @@ status:
   codeowners:
     active: [dmitryax, braydonk, rogercoll]
 
-sem_conv_version: 1.9.0
+feature_gates:
+  - id: scraper.process.DontEmitV0SystemConventions
+    description: When enabled, semconv legacy attributes are disabled.
+    stage: alpha
+    from_version: v0.154.0
+    reference_url: https://github.com/open-telemetry/semantic-conventions/issues/3041
+  - id: scraper.process.EmitV1SystemConventions
+    description: When enabled, semconv stable attributes are enabled.
+    stage: alpha
+    from_version: v0.154.0
+    reference_url: https://github.com/open-telemetry/semantic-conventions/issues/3041
+
+sem_conv_version: 1.41.0
 
 reaggregation_enabled: true
 
@@ -60,12 +72,20 @@ resource_attributes:
     type: int
 
 attributes:
+  context_switch.type@v1:
+    name_override: type
+    description: Specifies whether the context switches for this data point were voluntary or involuntary.
+    type: string
+    requirement_level: recommended
+    enum: [involuntary, voluntary]
+
   context_switch_type:
     name_override: type
     description: Type of context switched.
     type: string
     requirement_level: recommended
     enum: [involuntary, voluntary]
+
   direction:
     description: Direction of flow of bytes (read or write).
     type: string
@@ -96,6 +116,24 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [context_switch_type]
+    migration:
+      to: process.context_switches@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.context_switches@v1:
+    enabled: false
+    description: Number of times the process has been context switched.
+    extended_documentation: This metric is only available on Linux.
+    unit: '{context_switch}'
+    stability: stable
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: true
+    attributes: [context_switch.type@v1]
+
   process.cpu.time:
     enabled: true
     description: Total CPU seconds broken down by different states.

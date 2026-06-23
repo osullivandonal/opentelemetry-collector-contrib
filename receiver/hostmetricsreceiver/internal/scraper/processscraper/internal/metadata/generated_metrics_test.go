@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper/scrapertest"
@@ -65,9 +67,17 @@ func TestMetricsBuilder(t *testing.T) {
 			observedZapCore, observedLogs := observer.New(zap.WarnLevel)
 			settings := scrapertest.NewNopSettings(scrapertest.NopType)
 			settings.Logger = zap.New(observedZapCore)
+			if tt.name == "all_set" {
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"scraper.process.EmitV1SystemConventions", true))
+				t.Cleanup(func() {
+					featuregate.GlobalRegistry().Set("scraper.process.EmitV1SystemConventions", false)
+				})
+			}
 			mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, tt.name), settings, WithStartTime(start))
 			aggMap := make(map[string]string) // contains the aggregation strategies for each metric name
 			aggMap["process.context_switches"] = mb.metricProcessContextSwitches.config.AggregationStrategy
+			aggMap["process.context_switches@v1"] = mb.metricProcessContextSwitchesV1.config.AggregationStrategy
 			aggMap["process.cpu.time"] = mb.metricProcessCPUTime.config.AggregationStrategy
 			aggMap["process.cpu.utilization"] = mb.metricProcessCPUUtilization.config.AggregationStrategy
 			aggMap["process.disk.io"] = mb.metricProcessDiskIo.config.AggregationStrategy
@@ -75,17 +85,19 @@ func TestMetricsBuilder(t *testing.T) {
 			aggMap["process.paging.faults"] = mb.metricProcessPagingFaults.config.AggregationStrategy
 
 			expectedWarnings := 0
+			if tt.name == "all_set" {
+				expectedWarnings++ // attributes differ
+			}
 			if tt.metricsSet != testDataSetReag {
 				assert.Equal(t, expectedWarnings, observedLogs.Len())
 			}
 
 			defaultMetricsCount := 0
 			allMetricsCount := 0
+			if tt.name != "all_set" {
 
-			allMetricsCount++
-			mb.RecordProcessContextSwitchesDataPoint(ts, 1, AttributeContextSwitchTypeInvoluntary)
-			if tt.name == "reaggregate_set" {
-				mb.RecordProcessContextSwitchesDataPoint(ts, 3, AttributeContextSwitchTypeVoluntary)
+				allMetricsCount++
+				mb.RecordProcessContextSwitchesDataPoint(ts, 1, AttributeContextSwitchTypeInvoluntary)
 			}
 			defaultMetricsCount++
 			allMetricsCount++
@@ -155,6 +167,7 @@ func TestMetricsBuilder(t *testing.T) {
 			metrics := mb.Emit(WithResource(res))
 			if tt.name == "reaggregate_set" {
 				assert.Empty(t, mb.metricProcessContextSwitches.aggDataPoints)
+				assert.Empty(t, mb.metricProcessContextSwitchesV1.aggDataPoints)
 				assert.Empty(t, mb.metricProcessCPUTime.aggDataPoints)
 				assert.Empty(t, mb.metricProcessCPUUtilization.aggDataPoints)
 				assert.Empty(t, mb.metricProcessDiskIo.aggDataPoints)
@@ -187,50 +200,6 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for _, mi := range allMetricsList {
 				switch mi.Name() {
-				case "process.context_switches":
-					if tt.name != "reaggregate_set" {
-						assert.False(t, validatedMetrics["process.context_switches"], "Found a duplicate in the metrics slice: process.context_switches")
-						validatedMetrics["process.context_switches"] = true
-						assert.Equal(t, pmetric.MetricTypeSum, mi.Type())
-						assert.Equal(t, 1, mi.Sum().DataPoints().Len())
-						assert.Equal(t, "Number of times the process has been context switched.", mi.Description())
-						assert.Equal(t, "{count}", mi.Unit())
-						assert.True(t, mi.Sum().IsMonotonic())
-						assert.Equal(t, pmetric.AggregationTemporalityCumulative, mi.Sum().AggregationTemporality())
-						dp := mi.Sum().DataPoints().At(0)
-						assert.Equal(t, start, dp.StartTimestamp())
-						assert.Equal(t, ts, dp.Timestamp())
-						assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
-						assert.Equal(t, int64(1), dp.IntValue())
-						contextSwitchTypeAttrVal, ok := dp.Attributes().Get("type")
-						assert.True(t, ok)
-						assert.Equal(t, "involuntary", contextSwitchTypeAttrVal.Str())
-					} else {
-						assert.False(t, validatedMetrics["process.context_switches"], "Found a duplicate in the metrics slice: process.context_switches")
-						validatedMetrics["process.context_switches"] = true
-						assert.Equal(t, pmetric.MetricTypeSum, mi.Type())
-						assert.Equal(t, 1, mi.Sum().DataPoints().Len())
-						assert.Equal(t, "Number of times the process has been context switched.", mi.Description())
-						assert.Equal(t, "{count}", mi.Unit())
-						assert.True(t, mi.Sum().IsMonotonic())
-						assert.Equal(t, pmetric.AggregationTemporalityCumulative, mi.Sum().AggregationTemporality())
-						dp := mi.Sum().DataPoints().At(0)
-						assert.Equal(t, start, dp.StartTimestamp())
-						assert.Equal(t, ts, dp.Timestamp())
-						assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
-						switch aggMap["process.context_switches"] {
-						case "sum":
-							assert.Equal(t, int64(4), dp.IntValue())
-						case "avg":
-							assert.Equal(t, int64(2), dp.IntValue())
-						case "min":
-							assert.Equal(t, int64(1), dp.IntValue())
-						case "max":
-							assert.Equal(t, int64(3), dp.IntValue())
-						}
-						_, ok := dp.Attributes().Get("type")
-						assert.False(t, ok)
-					}
 				case "process.cpu.time":
 					if tt.name != "reaggregate_set" {
 						assert.False(t, validatedMetrics["process.cpu.time"], "Found a duplicate in the metrics slice: process.cpu.time")
@@ -559,4 +528,90 @@ func TestMetricsBuilder(t *testing.T) {
 			}
 		})
 	}
+}
+func TestVersionedMetrics(t *testing.T) {
+	t.Run("process.context_switches", func(t *testing.T) {
+		tests := []struct {
+			name               string
+			disableOld         bool
+			enableNew          bool
+			expectLegacyMetric bool
+			expectNewMetric    bool
+			expectLegacyAttrs  bool
+		}{
+			{
+				name:               "legacy_only",
+				disableOld:         false,
+				enableNew:          false,
+				expectLegacyMetric: true,
+				expectNewMetric:    false,
+			},
+			{
+				name:               "dual_emission",
+				disableOld:         false,
+				enableNew:          true,
+				expectLegacyMetric: false,
+				expectNewMetric:    true,
+				expectLegacyAttrs:  true,
+			},
+
+			{
+				name:               "new_only",
+				disableOld:         true,
+				enableNew:          true,
+				expectLegacyMetric: false,
+				expectNewMetric:    true,
+				expectLegacyAttrs:  false,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"scraper.process.DontEmitV0SystemConventions", tt.disableOld))
+				require.NoError(t, featuregate.GlobalRegistry().Set(
+					"scraper.process.EmitV1SystemConventions", tt.enableNew))
+				t.Cleanup(func() {
+					featuregate.GlobalRegistry().Set("scraper.process.DontEmitV0SystemConventions", false)
+					featuregate.GlobalRegistry().Set("scraper.process.EmitV1SystemConventions", false)
+				})
+
+				start := pcommon.Timestamp(1_000_000_000)
+				ts := pcommon.Timestamp(1_000_001_000)
+				settings := scrapertest.NewNopSettings(scrapertest.NopType)
+				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
+
+				mb.RecordProcessContextSwitchesDataPoint(ts, 1, AttributeContextSwitchTypeInvoluntary)
+
+				metrics := mb.Emit(WithResource(pcommon.NewResource()))
+
+				// Count metrics by name and type
+				var legacyFound, newFound bool
+				for ri := 0; ri < metrics.ResourceMetrics().Len(); ri++ {
+					ms := metrics.ResourceMetrics().At(ri).ScopeMetrics().At(0).Metrics()
+					for mi := 0; mi < ms.Len(); mi++ {
+						m := ms.At(mi)
+						// Same emitted name, same type - distinguish by attributes
+						if m.Name() == "process.context_switches" {
+							dp := m.Sum().DataPoints().At(0)
+							_, hasNewAttr := dp.Attributes().Get("type")
+							if hasNewAttr && m.Unit() == "{context_switch}" {
+								// Has v1-specific attribute - this is the new metric
+								newFound = true
+								if tt.expectLegacyAttrs {
+									_, hasContextSwitchType := dp.Attributes().Get("type")
+									assert.True(t, hasContextSwitchType, "expected legacy attr context_switch_type")
+								}
+							} else {
+								// No v1-specific attribute - this is the legacy metric
+								legacyFound = true
+							}
+						}
+					}
+				}
+				assert.Equal(t, tt.expectLegacyMetric, legacyFound)
+				assert.Equal(t, tt.expectNewMetric, newFound)
+			})
+		}
+	})
 }

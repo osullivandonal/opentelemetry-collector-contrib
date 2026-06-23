@@ -57,6 +57,54 @@ func (ms *ProcessContextSwitchesMetricConfig) Validate() error {
 	return nil
 }
 
+// ProcessContextSwitchesV1MetricAttributeKey specifies the key of an attribute for the process.context_switches@v1 metric.
+type ProcessContextSwitchesV1MetricAttributeKey string
+
+const (
+	ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1 ProcessContextSwitchesV1MetricAttributeKey = "type"
+)
+
+// ProcessContextSwitchesV1MetricConfig provides config for the process.context_switches@v1 metric.
+type ProcessContextSwitchesV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                                       `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []ProcessContextSwitchesV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *ProcessContextSwitchesV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *ProcessContextSwitchesV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1:
+		default:
+			return fmt.Errorf("metric process.context_switches@v1 doesn't have an attribute %v, valid attributes: [type]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
 // ProcessCPUTimeMetricAttributeKey specifies the key of an attribute for the process.cpu.time metric.
 type ProcessCPUTimeMetricAttributeKey string
 
@@ -460,6 +508,7 @@ func (ms *ProcessUptimeMetricConfig) Unmarshal(parser *confmap.Conf) error {
 // MetricsConfig provides config for process metrics.
 type MetricsConfig struct {
 	ProcessContextSwitches     ProcessContextSwitchesMetricConfig     `mapstructure:"process.context_switches"`
+	ProcessContextSwitchesV1   ProcessContextSwitchesV1MetricConfig   `mapstructure:"process.context_switches@v1"`
 	ProcessCPUTime             ProcessCPUTimeMetricConfig             `mapstructure:"process.cpu.time"`
 	ProcessCPUUtilization      ProcessCPUUtilizationMetricConfig      `mapstructure:"process.cpu.utilization"`
 	ProcessDiskIo              ProcessDiskIoMetricConfig              `mapstructure:"process.disk.io"`
@@ -481,6 +530,11 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled:             false,
 			AggregationStrategy: AggregationStrategySum,
 			EnabledAttributes:   []ProcessContextSwitchesMetricAttributeKey{ProcessContextSwitchesMetricAttributeKeyContextSwitchType},
+		},
+		ProcessContextSwitchesV1: ProcessContextSwitchesV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategySum,
+			EnabledAttributes:   []ProcessContextSwitchesV1MetricAttributeKey{ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1},
 		},
 		ProcessCPUTime: ProcessCPUTimeMetricConfig{
 			Enabled:             true,

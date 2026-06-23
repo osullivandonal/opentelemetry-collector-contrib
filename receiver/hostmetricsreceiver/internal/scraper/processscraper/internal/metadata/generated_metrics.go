@@ -11,7 +11,8 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/collector/scraper"
-	conventions "go.opentelemetry.io/otel/semconv/v1.9.0"
+	conventions "go.opentelemetry.io/otel/semconv/v1.41.0"
+	"go.uber.org/zap"
 )
 
 const (
@@ -20,6 +21,32 @@ const (
 	AggregationStrategyMin = "min"
 	AggregationStrategyMax = "max"
 )
+
+// AttributeContextSwitchTypeV1 specifies the value context_switch.type@v1 attribute.
+type AttributeContextSwitchTypeV1 int
+
+const (
+	_ AttributeContextSwitchTypeV1 = iota
+	AttributeContextSwitchTypeV1Involuntary
+	AttributeContextSwitchTypeV1Voluntary
+)
+
+// String returns the string representation of the AttributeContextSwitchTypeV1.
+func (av AttributeContextSwitchTypeV1) String() string {
+	switch av {
+	case AttributeContextSwitchTypeV1Involuntary:
+		return "involuntary"
+	case AttributeContextSwitchTypeV1Voluntary:
+		return "voluntary"
+	}
+	return ""
+}
+
+// MapAttributeContextSwitchTypeV1 is a helper map of string to AttributeContextSwitchTypeV1 attribute value.
+var MapAttributeContextSwitchTypeV1 = map[string]AttributeContextSwitchTypeV1{
+	"involuntary": AttributeContextSwitchTypeV1Involuntary,
+	"voluntary":   AttributeContextSwitchTypeV1Voluntary,
+}
 
 // AttributeContextSwitchType specifies the value context_switch_type attribute.
 type AttributeContextSwitchType int
@@ -134,6 +161,10 @@ var MetricsInfo = metricsInfo{
 		Name:       "process.context_switches",
 		Attributes: []string{"context_switch_type"},
 	},
+	ProcessContextSwitchesV1: metricInfo{
+		Name:       "process.context_switches",
+		Attributes: []string{"context_switch.type@v1"},
+	},
 	ProcessCPUTime: metricInfo{
 		Name:       "process.cpu.time",
 		Attributes: []string{"state"},
@@ -182,6 +213,7 @@ var MetricsInfo = metricsInfo{
 
 type metricsInfo struct {
 	ProcessContextSwitches     metricInfo
+	ProcessContextSwitchesV1   metricInfo
 	ProcessCPUTime             metricInfo
 	ProcessCPUUtilization      metricInfo
 	ProcessDiskIo              metricInfo
@@ -285,6 +317,100 @@ func (m *metricProcessContextSwitches) emit(metrics pmetric.MetricSlice) {
 
 func newMetricProcessContextSwitches(cfg ProcessContextSwitchesMetricConfig) metricProcessContextSwitches {
 	m := metricProcessContextSwitches{config: cfg}
+
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricProcessContextSwitchesV1 struct {
+	data          pmetric.Metric                       // data buffer for generated metric.
+	config        ProcessContextSwitchesV1MetricConfig // metric config provided by user.
+	capacity      int                                  // max observed number of data points added to the metric.
+	aggDataPoints []int64                              // slice containing number of aggregated datapoints at each index
+}
+
+// init fills process.context_switches@v1 metric with initial data.
+func (m *metricProcessContextSwitchesV1) init() {
+	m.data.SetName("process.context_switches")
+	m.data.SetDescription("Number of times the process has been context switched.")
+	m.data.SetUnit("{context_switch}")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(true)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
+	m.aggDataPoints = m.aggDataPoints[:0]
+}
+
+func (m *metricProcessContextSwitchesV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, contextSwitchTypeV1AttributeValue string, emitLegacyAttrs bool) {
+	if !m.config.Enabled {
+		return
+	}
+
+	dp := pmetric.NewNumberDataPoint()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	if slices.Contains(m.config.EnabledAttributes, ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1) {
+		dp.Attributes().PutStr("type", contextSwitchTypeV1AttributeValue)
+	}
+	if emitLegacyAttrs {
+		dp.Attributes().PutStr("type", contextSwitchTypeV1AttributeValue)
+	}
+
+	var s string
+	dps := m.data.Sum().DataPoints()
+	for i := 0; i < dps.Len(); i++ {
+		dpi := dps.At(i)
+		if dp.Attributes().Equal(dpi.Attributes()) && dp.StartTimestamp() == dpi.StartTimestamp() && dp.Timestamp() == dpi.Timestamp() {
+			switch s = m.config.AggregationStrategy; s {
+			case AggregationStrategySum, AggregationStrategyAvg:
+				dpi.SetIntValue(dpi.IntValue() + val)
+				m.aggDataPoints[i] += 1
+				return
+			case AggregationStrategyMin:
+				if dpi.IntValue() > val {
+					dpi.SetIntValue(val)
+				}
+				return
+			case AggregationStrategyMax:
+				if dpi.IntValue() < val {
+					dpi.SetIntValue(val)
+				}
+				return
+			}
+		}
+	}
+
+	dp.SetIntValue(val)
+	m.aggDataPoints = append(m.aggDataPoints, 1)
+	dp.MoveTo(dps.AppendEmpty())
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricProcessContextSwitchesV1) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricProcessContextSwitchesV1) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		if m.config.AggregationStrategy == AggregationStrategyAvg {
+			for i, aggCount := range m.aggDataPoints {
+				m.data.Sum().DataPoints().At(i).SetIntValue(m.data.Sum().DataPoints().At(i).IntValue() / aggCount)
+			}
+		}
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricProcessContextSwitchesV1(cfg ProcessContextSwitchesV1MetricConfig) metricProcessContextSwitchesV1 {
+	m := metricProcessContextSwitchesV1{config: cfg}
 
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
@@ -1169,6 +1295,7 @@ type MetricsBuilder struct {
 	resourceAttributeIncludeFilter   map[string]filter.Filter
 	resourceAttributeExcludeFilter   map[string]filter.Filter
 	metricProcessContextSwitches     metricProcessContextSwitches
+	metricProcessContextSwitchesV1   metricProcessContextSwitchesV1
 	metricProcessCPUTime             metricProcessCPUTime
 	metricProcessCPUUtilization      metricProcessCPUUtilization
 	metricProcessDiskIo              metricProcessDiskIo
@@ -1208,6 +1335,7 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 		metricsBuffer:                    pmetric.NewMetrics(),
 		buildInfo:                        settings.BuildInfo,
 		metricProcessContextSwitches:     newMetricProcessContextSwitches(mbc.Metrics.ProcessContextSwitches),
+		metricProcessContextSwitchesV1:   newMetricProcessContextSwitchesV1(mbc.Metrics.ProcessContextSwitchesV1),
 		metricProcessCPUTime:             newMetricProcessCPUTime(mbc.Metrics.ProcessCPUTime),
 		metricProcessCPUUtilization:      newMetricProcessCPUUtilization(mbc.Metrics.ProcessCPUUtilization),
 		metricProcessDiskIo:              newMetricProcessDiskIo(mbc.Metrics.ProcessDiskIo),
@@ -1271,6 +1399,32 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 	}
 	if mbc.ResourceAttributes.ProcessPid.MetricsExclude != nil {
 		mb.resourceAttributeExcludeFilter["process.pid"] = filter.CreateFilter(mbc.ResourceAttributes.ProcessPid.MetricsExclude)
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		if mb.metricProcessContextSwitches.config.Enabled && mb.metricProcessContextSwitchesV1.config.Enabled {
+			var disable bool
+			if mb.metricProcessContextSwitches.data.Type() != mb.metricProcessContextSwitchesV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
+				disable = true
+				settings.Logger.Warn("[WARNING] Legacy metric `process.context_switches` disabled: same emitted name as `process.context_switches@v1` with different type; only latest will be emitted")
+			}
+			if !slices.Equal(MetricsInfo.ProcessContextSwitches.Attributes, MetricsInfo.ProcessContextSwitchesV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
+				disable = true
+				settings.Logger.Warn("[WARNING] Legacy metric `process.context_switches` disabled: same emitted name as `process.context_switches@v1` with different attributes; only latest will be emitted with combined attributes",
+					zap.Strings("legacy_attributes", MetricsInfo.ProcessContextSwitches.Attributes),
+					zap.Strings("latest_attributes", MetricsInfo.ProcessContextSwitchesV1.Attributes))
+			}
+			if disable {
+				mb.metricProcessContextSwitches.config.Enabled = false
+			}
+		}
+	} else {
+		if !ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() && mb.metricProcessContextSwitchesV1.config.Enabled {
+			mb.metricProcessContextSwitchesV1.config.Enabled = false
+			settings.Logger.Warn("[WARNING] metric `process.context_switches@v1` requires feature gate `scraper.process.EmitV1SystemConventions` to be enabled, metric has been disabled")
+		}
 	}
 
 	for _, op := range options {
@@ -1343,6 +1497,7 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
 	mb.metricProcessContextSwitches.emit(ils.Metrics())
+	mb.metricProcessContextSwitchesV1.emit(ils.Metrics())
 	mb.metricProcessCPUTime.emit(ils.Metrics())
 	mb.metricProcessCPUUtilization.emit(ils.Metrics())
 	mb.metricProcessDiskIo.emit(ils.Metrics())
@@ -1389,7 +1544,13 @@ func (mb *MetricsBuilder) Emit(options ...ResourceMetricsOption) pmetric.Metrics
 
 // RecordProcessContextSwitchesDataPoint adds a data point to process.context_switches metric.
 func (mb *MetricsBuilder) RecordProcessContextSwitchesDataPoint(ts pcommon.Timestamp, val int64, contextSwitchTypeAttributeValue AttributeContextSwitchType) {
-	mb.metricProcessContextSwitches.recordDataPoint(mb.startTime, ts, val, contextSwitchTypeAttributeValue.String())
+	// Dual-schema emission controlled by feature gates
+	if !ScraperProcessDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricProcessContextSwitches.recordDataPoint(mb.startTime, ts, val, contextSwitchTypeAttributeValue.String())
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
+		mb.metricProcessContextSwitchesV1.recordDataPoint(mb.startTime, ts, val, contextSwitchTypeAttributeValue.String(), true)
+	}
 }
 
 // RecordProcessCPUTimeDataPoint adds a data point to process.cpu.time metric.
