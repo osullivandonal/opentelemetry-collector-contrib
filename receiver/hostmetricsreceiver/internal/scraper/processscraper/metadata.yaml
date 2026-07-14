@@ -29,6 +29,7 @@ resource_attributes:
     description: cgroup associated with the process (Linux only).
     enabled: false
     type: string
+
   process.command:
     description: >-
       The command used to launch the process (i.e. the command name). On Linux based
@@ -58,6 +59,12 @@ resource_attributes:
       GetProcessImageFileNameW.
     enabled: true
     type: string
+
+  process.linux.cgroup:
+    description: The control group associated with the process.
+    enabled: false
+    type: string
+
   process.owner:
     description: The username of the user that owns the process.
     enabled: true
@@ -86,8 +93,20 @@ attributes:
     requirement_level: recommended
     enum: [involuntary, voluntary]
 
+  cpu.mode:
+    description: The CPU mode for this data point.
+    type: string
+    requirement_level: recommended
+    enum: [system, user, wait]
+
   direction:
     description: Direction of flow of bytes (read or write).
+    type: string
+    requirement_level: recommended
+    enum: [read, write]
+
+  disk.io.direction:
+    description: The disk IO operation direction.
     type: string
     requirement_level: recommended
     enum: [read, write]
@@ -98,6 +117,7 @@ attributes:
     type: string
     requirement_level: recommended
     enum: [major, minor]
+
   state:
     description: Breakdown of CPU usage by type.
     type: string
@@ -127,7 +147,7 @@ metrics:
     description: Number of times the process has been context switched.
     extended_documentation: This metric is only available on Linux.
     unit: '{context_switch}'
-    stability: stable
+    stability: development
     sum:
       value_type: int
       aggregation_temporality: cumulative
@@ -144,6 +164,22 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [state]
+    migration:
+      to: process.cpu.time@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.cpu.time@v1:
+    enabled: false
+    description: Total CPU seconds broken down by different cpu.modes.
+    unit: s
+    stability: development
+    sum:
+      value_type: double
+      aggregation_temporality: cumulative
+      monotonic: true
+    attributes: [cpu.mode]
 
   process.cpu.utilization:
     enabled: false
@@ -156,6 +192,24 @@ metrics:
     gauge:
       value_type: double
     attributes: [state]
+    migration:
+      to: process.cpu.utilization@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.cpu.utilization@v1:
+    enabled: false
+    description: >-
+      Percentage of total CPU time used by the process since last scrape,
+      expressed as a value between 0 and 1.
+      On the first scrape, no data point is emitted for this metric.
+    unit: "1"
+    stability: development
+    gauge:
+      value_type: double
+    attributes: [cpu.mode]
+
   process.disk.io:
     enabled: true
     description: Disk bytes transferred.
@@ -166,6 +220,22 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [direction]
+    migration:
+      to: process.disk.io@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.disk.io@v1:
+    enabled: false
+    description: Disk bytes transferred.
+    unit: By
+    stability: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: true
+    attributes: [disk.io.direction]
 
   process.disk.operations:
     enabled: false
@@ -177,6 +247,23 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [direction]
+    migration:
+      to: process.disk.operations@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.disk.operations@v1:
+    enabled: false
+    description: Number of disk operations performed by the process.
+    unit: "{operations}"
+    stability: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: true
+    attributes: [disk.io.direction]
+
   process.handles:
     enabled: false
     description: Number of open handles held by the process.
@@ -229,6 +316,11 @@ metrics:
       value_type: int
       aggregation_temporality: cumulative
       monotonic: false
+    migration:
+      to: process.unix.file_descriptor.count@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
 
   process.paging.faults:
     enabled: false
@@ -253,10 +345,35 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: false
 
+  process.thread.count@v1:
+    enabled: false
+    description: Process threads count.
+    unit: "{threads}"
+    stability: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: false
+
   process.threads:
     enabled: false
     description: Process threads count.
     unit: "{threads}"
+    stability: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: false
+    migration:
+      to: process.thread.count@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.unix.file_descriptor.count@v1:
+    enabled: false
+    description: Number of unix file descriptors in use by the process.
+    unit: '{file_descriptor}'
     stability: development
     sum:
       value_type: int
@@ -270,3 +387,14 @@ metrics:
     stability: development
     gauge:
       value_type: double
+
+  process.windows.handles@v1:
+    enabled: false
+    description: Number of handles held by the process.
+    extended_documentation: This metric is only available on Windows.
+    unit: '{handle}'
+    stability: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: false

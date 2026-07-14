@@ -147,6 +147,7 @@ require (
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/hexops/gotextdiff v1.0.3 // indirect
+	github.com/iimos/ucum v0.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/go-yaml v0.0.0-20251001235044-fca9a0999f15 // indirect
 	github.com/itchyny/gojq v0.12.19 // indirect
@@ -281,13 +282,13 @@ require (
 	go.opentelemetry.io/build-tools/multimod v0.30.0 // indirect
 	go.opentelemetry.io/collector/cmd/builder v0.154.1-0.20260618174006-415d3dcae73b // indirect
 	go.opentelemetry.io/collector/cmd/mdatagen v0.154.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/component v1.60.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/confmap v1.60.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.60.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/featuregate v1.60.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/filter v0.154.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/internal/schemagen v0.154.1-0.20260618174006-415d3dcae73b // indirect
-	go.opentelemetry.io/collector/pdata v1.60.1-0.20260618174006-415d3dcae73b // indirect
+	go.opentelemetry.io/collector/component v1.62.0 // indirect
+	go.opentelemetry.io/collector/confmap v1.62.0 // indirect
+	go.opentelemetry.io/collector/confmap/provider/fileprovider v1.62.0 // indirect
+	go.opentelemetry.io/collector/featuregate v1.62.0 // indirect
+	go.opentelemetry.io/collector/filter v0.156.0 // indirect
+	go.opentelemetry.io/collector/internal/schemagen v0.156.0 // indirect
+	go.opentelemetry.io/collector/pdata v1.62.0 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
 	go.opentelemetry.io/otel/trace v1.44.0 // indirect
@@ -303,10 +304,10 @@ require (
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
-	golang.org/x/telemetry v0.0.0-20260610154732-fb80ec83bdd9 // indirect
+	golang.org/x/telemetry v0.0.0-20260625142307-59b4966ccb57 // indirect
 	golang.org/x/term v0.44.0 // indirect
-	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/text v0.39.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 	golang.org/x/vuln v1.3.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
@@ -322,3 +323,5 @@ retract (
 	v0.76.1
 	v0.65.0
 )
+
+replace go.opentelemetry.io/collector/cmd/mdatagen => /home/dos/Documents/opentelemetry-collector/cmd/mdatagen

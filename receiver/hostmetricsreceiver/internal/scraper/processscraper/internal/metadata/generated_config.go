@@ -153,6 +153,54 @@ func (ms *ProcessCPUTimeMetricConfig) Validate() error {
 	return nil
 }
 
+// ProcessCPUTimeV1MetricAttributeKey specifies the key of an attribute for the process.cpu.time@v1 metric.
+type ProcessCPUTimeV1MetricAttributeKey string
+
+const (
+	ProcessCPUTimeV1MetricAttributeKeyCPUMode ProcessCPUTimeV1MetricAttributeKey = "cpu.mode"
+)
+
+// ProcessCPUTimeV1MetricConfig provides config for the process.cpu.time@v1 metric.
+type ProcessCPUTimeV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                               `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []ProcessCPUTimeV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *ProcessCPUTimeV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *ProcessCPUTimeV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case ProcessCPUTimeV1MetricAttributeKeyCPUMode:
+		default:
+			return fmt.Errorf("metric process.cpu.time@v1 doesn't have an attribute %v, valid attributes: [cpu.mode]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
 // ProcessCPUUtilizationMetricAttributeKey specifies the key of an attribute for the process.cpu.utilization metric.
 type ProcessCPUUtilizationMetricAttributeKey string
 
@@ -189,6 +237,54 @@ func (ms *ProcessCPUUtilizationMetricConfig) Validate() error {
 		case ProcessCPUUtilizationMetricAttributeKeyState:
 		default:
 			return fmt.Errorf("metric process.cpu.utilization doesn't have an attribute %v, valid attributes: [state]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
+// ProcessCPUUtilizationV1MetricAttributeKey specifies the key of an attribute for the process.cpu.utilization@v1 metric.
+type ProcessCPUUtilizationV1MetricAttributeKey string
+
+const (
+	ProcessCPUUtilizationV1MetricAttributeKeyCPUMode ProcessCPUUtilizationV1MetricAttributeKey = "cpu.mode"
+)
+
+// ProcessCPUUtilizationV1MetricConfig provides config for the process.cpu.utilization@v1 metric.
+type ProcessCPUUtilizationV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                                      `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []ProcessCPUUtilizationV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *ProcessCPUUtilizationV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *ProcessCPUUtilizationV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case ProcessCPUUtilizationV1MetricAttributeKeyCPUMode:
+		default:
+			return fmt.Errorf("metric process.cpu.utilization@v1 doesn't have an attribute %v, valid attributes: [cpu.mode]", val)
 		}
 	}
 
@@ -249,6 +345,54 @@ func (ms *ProcessDiskIoMetricConfig) Validate() error {
 	return nil
 }
 
+// ProcessDiskIoV1MetricAttributeKey specifies the key of an attribute for the process.disk.io@v1 metric.
+type ProcessDiskIoV1MetricAttributeKey string
+
+const (
+	ProcessDiskIoV1MetricAttributeKeyDiskIoDirection ProcessDiskIoV1MetricAttributeKey = "disk.io.direction"
+)
+
+// ProcessDiskIoV1MetricConfig provides config for the process.disk.io@v1 metric.
+type ProcessDiskIoV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                              `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []ProcessDiskIoV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *ProcessDiskIoV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *ProcessDiskIoV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case ProcessDiskIoV1MetricAttributeKeyDiskIoDirection:
+		default:
+			return fmt.Errorf("metric process.disk.io@v1 doesn't have an attribute %v, valid attributes: [disk.io.direction]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
 // ProcessDiskOperationsMetricAttributeKey specifies the key of an attribute for the process.disk.operations metric.
 type ProcessDiskOperationsMetricAttributeKey string
 
@@ -285,6 +429,54 @@ func (ms *ProcessDiskOperationsMetricConfig) Validate() error {
 		case ProcessDiskOperationsMetricAttributeKeyDirection:
 		default:
 			return fmt.Errorf("metric process.disk.operations doesn't have an attribute %v, valid attributes: [direction]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
+// ProcessDiskOperationsV1MetricAttributeKey specifies the key of an attribute for the process.disk.operations@v1 metric.
+type ProcessDiskOperationsV1MetricAttributeKey string
+
+const (
+	ProcessDiskOperationsV1MetricAttributeKeyDiskIoDirection ProcessDiskOperationsV1MetricAttributeKey = "disk.io.direction"
+)
+
+// ProcessDiskOperationsV1MetricConfig provides config for the process.disk.operations@v1 metric.
+type ProcessDiskOperationsV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                                      `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []ProcessDiskOperationsV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *ProcessDiskOperationsV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *ProcessDiskOperationsV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case ProcessDiskOperationsV1MetricAttributeKeyDiskIoDirection:
+		default:
+			return fmt.Errorf("metric process.disk.operations@v1 doesn't have an attribute %v, valid attributes: [disk.io.direction]", val)
 		}
 	}
 
@@ -465,6 +657,26 @@ func (ms *ProcessSignalsPendingMetricConfig) Unmarshal(parser *confmap.Conf) err
 	return nil
 }
 
+// ProcessThreadCountV1MetricConfig provides config for the process.thread.count@v1 metric.
+type ProcessThreadCountV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+}
+
+func (ms *ProcessThreadCountV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
 // ProcessThreadsMetricConfig provides config for the process.threads metric.
 type ProcessThreadsMetricConfig struct {
 	Enabled          bool `mapstructure:"enabled"`
@@ -472,6 +684,26 @@ type ProcessThreadsMetricConfig struct {
 }
 
 func (ms *ProcessThreadsMetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+// ProcessUnixFileDescriptorCountV1MetricConfig provides config for the process.unix.file_descriptor.count@v1 metric.
+type ProcessUnixFileDescriptorCountV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+}
+
+func (ms *ProcessUnixFileDescriptorCountV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
 	if parser == nil {
 		return nil
 	}
@@ -505,23 +737,50 @@ func (ms *ProcessUptimeMetricConfig) Unmarshal(parser *confmap.Conf) error {
 	return nil
 }
 
+// ProcessWindowsHandlesV1MetricConfig provides config for the process.windows.handles@v1 metric.
+type ProcessWindowsHandlesV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+}
+
+func (ms *ProcessWindowsHandlesV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
 // MetricsConfig provides config for process metrics.
 type MetricsConfig struct {
-	ProcessContextSwitches     ProcessContextSwitchesMetricConfig     `mapstructure:"process.context_switches"`
-	ProcessContextSwitchesV1   ProcessContextSwitchesV1MetricConfig   `mapstructure:"process.context_switches@v1"`
-	ProcessCPUTime             ProcessCPUTimeMetricConfig             `mapstructure:"process.cpu.time"`
-	ProcessCPUUtilization      ProcessCPUUtilizationMetricConfig      `mapstructure:"process.cpu.utilization"`
-	ProcessDiskIo              ProcessDiskIoMetricConfig              `mapstructure:"process.disk.io"`
-	ProcessDiskOperations      ProcessDiskOperationsMetricConfig      `mapstructure:"process.disk.operations"`
-	ProcessHandles             ProcessHandlesMetricConfig             `mapstructure:"process.handles"`
-	ProcessMemoryUsage         ProcessMemoryUsageMetricConfig         `mapstructure:"process.memory.usage"`
-	ProcessMemoryUtilization   ProcessMemoryUtilizationMetricConfig   `mapstructure:"process.memory.utilization"`
-	ProcessMemoryVirtual       ProcessMemoryVirtualMetricConfig       `mapstructure:"process.memory.virtual"`
-	ProcessOpenFileDescriptors ProcessOpenFileDescriptorsMetricConfig `mapstructure:"process.open_file_descriptors"`
-	ProcessPagingFaults        ProcessPagingFaultsMetricConfig        `mapstructure:"process.paging.faults"`
-	ProcessSignalsPending      ProcessSignalsPendingMetricConfig      `mapstructure:"process.signals_pending"`
-	ProcessThreads             ProcessThreadsMetricConfig             `mapstructure:"process.threads"`
-	ProcessUptime              ProcessUptimeMetricConfig              `mapstructure:"process.uptime"`
+	ProcessContextSwitches           ProcessContextSwitchesMetricConfig           `mapstructure:"process.context_switches"`
+	ProcessContextSwitchesV1         ProcessContextSwitchesV1MetricConfig         `mapstructure:"process.context_switches@v1"`
+	ProcessCPUTime                   ProcessCPUTimeMetricConfig                   `mapstructure:"process.cpu.time"`
+	ProcessCPUTimeV1                 ProcessCPUTimeV1MetricConfig                 `mapstructure:"process.cpu.time@v1"`
+	ProcessCPUUtilization            ProcessCPUUtilizationMetricConfig            `mapstructure:"process.cpu.utilization"`
+	ProcessCPUUtilizationV1          ProcessCPUUtilizationV1MetricConfig          `mapstructure:"process.cpu.utilization@v1"`
+	ProcessDiskIo                    ProcessDiskIoMetricConfig                    `mapstructure:"process.disk.io"`
+	ProcessDiskIoV1                  ProcessDiskIoV1MetricConfig                  `mapstructure:"process.disk.io@v1"`
+	ProcessDiskOperations            ProcessDiskOperationsMetricConfig            `mapstructure:"process.disk.operations"`
+	ProcessDiskOperationsV1          ProcessDiskOperationsV1MetricConfig          `mapstructure:"process.disk.operations@v1"`
+	ProcessHandles                   ProcessHandlesMetricConfig                   `mapstructure:"process.handles"`
+	ProcessMemoryUsage               ProcessMemoryUsageMetricConfig               `mapstructure:"process.memory.usage"`
+	ProcessMemoryUtilization         ProcessMemoryUtilizationMetricConfig         `mapstructure:"process.memory.utilization"`
+	ProcessMemoryVirtual             ProcessMemoryVirtualMetricConfig             `mapstructure:"process.memory.virtual"`
+	ProcessOpenFileDescriptors       ProcessOpenFileDescriptorsMetricConfig       `mapstructure:"process.open_file_descriptors"`
+	ProcessPagingFaults              ProcessPagingFaultsMetricConfig              `mapstructure:"process.paging.faults"`
+	ProcessSignalsPending            ProcessSignalsPendingMetricConfig            `mapstructure:"process.signals_pending"`
+	ProcessThreadCountV1             ProcessThreadCountV1MetricConfig             `mapstructure:"process.thread.count@v1"`
+	ProcessThreads                   ProcessThreadsMetricConfig                   `mapstructure:"process.threads"`
+	ProcessUnixFileDescriptorCountV1 ProcessUnixFileDescriptorCountV1MetricConfig `mapstructure:"process.unix.file_descriptor.count@v1"`
+	ProcessUptime                    ProcessUptimeMetricConfig                    `mapstructure:"process.uptime"`
+	ProcessWindowsHandlesV1          ProcessWindowsHandlesV1MetricConfig          `mapstructure:"process.windows.handles@v1"`
 }
 
 func DefaultMetricsConfig() MetricsConfig {
@@ -541,20 +800,40 @@ func DefaultMetricsConfig() MetricsConfig {
 			AggregationStrategy: AggregationStrategySum,
 			EnabledAttributes:   []ProcessCPUTimeMetricAttributeKey{ProcessCPUTimeMetricAttributeKeyState},
 		},
+		ProcessCPUTimeV1: ProcessCPUTimeV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategySum,
+			EnabledAttributes:   []ProcessCPUTimeV1MetricAttributeKey{ProcessCPUTimeV1MetricAttributeKeyCPUMode},
+		},
 		ProcessCPUUtilization: ProcessCPUUtilizationMetricConfig{
 			Enabled:             false,
 			AggregationStrategy: AggregationStrategyAvg,
 			EnabledAttributes:   []ProcessCPUUtilizationMetricAttributeKey{ProcessCPUUtilizationMetricAttributeKeyState},
+		},
+		ProcessCPUUtilizationV1: ProcessCPUUtilizationV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategyAvg,
+			EnabledAttributes:   []ProcessCPUUtilizationV1MetricAttributeKey{ProcessCPUUtilizationV1MetricAttributeKeyCPUMode},
 		},
 		ProcessDiskIo: ProcessDiskIoMetricConfig{
 			Enabled:             true,
 			AggregationStrategy: AggregationStrategySum,
 			EnabledAttributes:   []ProcessDiskIoMetricAttributeKey{ProcessDiskIoMetricAttributeKeyDirection},
 		},
+		ProcessDiskIoV1: ProcessDiskIoV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategySum,
+			EnabledAttributes:   []ProcessDiskIoV1MetricAttributeKey{ProcessDiskIoV1MetricAttributeKeyDiskIoDirection},
+		},
 		ProcessDiskOperations: ProcessDiskOperationsMetricConfig{
 			Enabled:             false,
 			AggregationStrategy: AggregationStrategySum,
 			EnabledAttributes:   []ProcessDiskOperationsMetricAttributeKey{ProcessDiskOperationsMetricAttributeKeyDirection},
+		},
+		ProcessDiskOperationsV1: ProcessDiskOperationsV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategySum,
+			EnabledAttributes:   []ProcessDiskOperationsV1MetricAttributeKey{ProcessDiskOperationsV1MetricAttributeKeyDiskIoDirection},
 		},
 		ProcessHandles: ProcessHandlesMetricConfig{
 			Enabled: false,
@@ -579,10 +858,19 @@ func DefaultMetricsConfig() MetricsConfig {
 		ProcessSignalsPending: ProcessSignalsPendingMetricConfig{
 			Enabled: false,
 		},
+		ProcessThreadCountV1: ProcessThreadCountV1MetricConfig{
+			Enabled: false,
+		},
 		ProcessThreads: ProcessThreadsMetricConfig{
 			Enabled: false,
 		},
+		ProcessUnixFileDescriptorCountV1: ProcessUnixFileDescriptorCountV1MetricConfig{
+			Enabled: false,
+		},
 		ProcessUptime: ProcessUptimeMetricConfig{
+			Enabled: false,
+		},
+		ProcessWindowsHandlesV1: ProcessWindowsHandlesV1MetricConfig{
 			Enabled: false,
 		},
 	}
@@ -621,6 +909,7 @@ type ResourceAttributesConfig struct {
 	ProcessCommandLine    ResourceAttributeConfig `mapstructure:"process.command_line"`
 	ProcessExecutableName ResourceAttributeConfig `mapstructure:"process.executable.name"`
 	ProcessExecutablePath ResourceAttributeConfig `mapstructure:"process.executable.path"`
+	ProcessLinuxCgroup    ResourceAttributeConfig `mapstructure:"process.linux.cgroup"`
 	ProcessOwner          ResourceAttributeConfig `mapstructure:"process.owner"`
 	ProcessParentPid      ResourceAttributeConfig `mapstructure:"process.parent_pid"`
 	ProcessPid            ResourceAttributeConfig `mapstructure:"process.pid"`
@@ -642,6 +931,9 @@ func DefaultResourceAttributesConfig() ResourceAttributesConfig {
 		},
 		ProcessExecutablePath: ResourceAttributeConfig{
 			Enabled: true,
+		},
+		ProcessLinuxCgroup: ResourceAttributeConfig{
+			Enabled: false,
 		},
 		ProcessOwner: ResourceAttributeConfig{
 			Enabled: true,
