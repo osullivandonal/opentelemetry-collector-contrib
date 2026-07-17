@@ -81,7 +81,7 @@ const (
 	_ AttributeCPUMode = iota
 	AttributeCPUModeSystem
 	AttributeCPUModeUser
-	AttributeCPUModeWait
+	AttributeCPUModeIowait
 )
 
 // String returns the string representation of the AttributeCPUMode.
@@ -91,8 +91,8 @@ func (av AttributeCPUMode) String() string {
 		return "system"
 	case AttributeCPUModeUser:
 		return "user"
-	case AttributeCPUModeWait:
-		return "wait"
+	case AttributeCPUModeIowait:
+		return "iowait"
 	}
 	return ""
 }
@@ -101,7 +101,7 @@ func (av AttributeCPUMode) String() string {
 var MapAttributeCPUMode = map[string]AttributeCPUMode{
 	"system": AttributeCPUModeSystem,
 	"user":   AttributeCPUModeUser,
-	"wait":   AttributeCPUModeWait,
+	"iowait": AttributeCPUModeIowait,
 }
 
 // AttributeDirection specifies the value direction attribute.
@@ -617,7 +617,7 @@ func (m *metricProcessCPUTimeV1) init() {
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricProcessCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuModeAttributeValue string, emitLegacyAttrs bool) {
+func (m *metricProcessCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuModeAttributeValue string, stateAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -629,7 +629,7 @@ func (m *metricProcessCPUTimeV1) recordDataPoint(start pcommon.Timestamp, ts pco
 		dp.Attributes().PutStr("cpu.mode", cpuModeAttributeValue)
 	}
 	if emitLegacyAttrs {
-		dp.Attributes().PutStr("state", cpuModeAttributeValue)
+		dp.Attributes().PutStr("state", stateAttributeValue)
 	}
 
 	var s string
@@ -798,7 +798,7 @@ func (m *metricProcessCPUUtilizationV1) init() {
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricProcessCPUUtilizationV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuModeAttributeValue string, emitLegacyAttrs bool) {
+func (m *metricProcessCPUUtilizationV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, cpuModeAttributeValue string, stateAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -810,7 +810,7 @@ func (m *metricProcessCPUUtilizationV1) recordDataPoint(start pcommon.Timestamp,
 		dp.Attributes().PutStr("cpu.mode", cpuModeAttributeValue)
 	}
 	if emitLegacyAttrs {
-		dp.Attributes().PutStr("state", cpuModeAttributeValue)
+		dp.Attributes().PutStr("state", stateAttributeValue)
 	}
 
 	var s string
@@ -983,7 +983,7 @@ func (m *metricProcessDiskIoV1) init() {
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricProcessDiskIoV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, diskIoDirectionAttributeValue string, emitLegacyAttrs bool) {
+func (m *metricProcessDiskIoV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, diskIoDirectionAttributeValue string, directionAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -995,7 +995,7 @@ func (m *metricProcessDiskIoV1) recordDataPoint(start pcommon.Timestamp, ts pcom
 		dp.Attributes().PutStr("disk.io.direction", diskIoDirectionAttributeValue)
 	}
 	if emitLegacyAttrs {
-		dp.Attributes().PutStr("direction", diskIoDirectionAttributeValue)
+		dp.Attributes().PutStr("direction", directionAttributeValue)
 	}
 
 	var s string
@@ -1168,7 +1168,7 @@ func (m *metricProcessDiskOperationsV1) init() {
 	m.aggDataPoints = m.aggDataPoints[:0]
 }
 
-func (m *metricProcessDiskOperationsV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, diskIoDirectionAttributeValue string, emitLegacyAttrs bool) {
+func (m *metricProcessDiskOperationsV1) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, diskIoDirectionAttributeValue string, directionAttributeValue string, emitLegacyAttrs bool) {
 	if !m.config.Enabled {
 		return
 	}
@@ -1180,7 +1180,7 @@ func (m *metricProcessDiskOperationsV1) recordDataPoint(start pcommon.Timestamp,
 		dp.Attributes().PutStr("disk.io.direction", diskIoDirectionAttributeValue)
 	}
 	if emitLegacyAttrs {
-		dp.Attributes().PutStr("direction", diskIoDirectionAttributeValue)
+		dp.Attributes().PutStr("direction", directionAttributeValue)
 	}
 
 	var s string
@@ -2355,46 +2355,46 @@ func (mb *MetricsBuilder) RecordProcessContextSwitchesDataPoint(ts pcommon.Times
 }
 
 // RecordProcessCPUTimeDataPoint adds a data point to process.cpu.time metric.
-func (mb *MetricsBuilder) RecordProcessCPUTimeDataPoint(ts pcommon.Timestamp, val float64, stateAttributeValue AttributeState) {
+func (mb *MetricsBuilder) RecordProcessCPUTimeDataPoint(ts pcommon.Timestamp, val float64, stateAttributeValue AttributeState, cpuModeAttributeValue AttributeCPUMode) {
 	// Dual-schema emission controlled by feature gates
 	if !ScraperProcessDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
 		mb.metricProcessCPUTime.recordDataPoint(mb.startTime, ts, val, stateAttributeValue.String())
 	}
 	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
-		mb.metricProcessCPUTimeV1.recordDataPoint(mb.startTime, ts, val, stateAttributeValue.String(), true)
+		mb.metricProcessCPUTimeV1.recordDataPoint(mb.startTime, ts, val, cpuModeAttributeValue.String(), stateAttributeValue.String(), true)
 	}
 }
 
 // RecordProcessCPUUtilizationDataPoint adds a data point to process.cpu.utilization metric.
-func (mb *MetricsBuilder) RecordProcessCPUUtilizationDataPoint(ts pcommon.Timestamp, val float64, stateAttributeValue AttributeState) {
+func (mb *MetricsBuilder) RecordProcessCPUUtilizationDataPoint(ts pcommon.Timestamp, val float64, stateAttributeValue AttributeState, cpuModeAttributeValue AttributeCPUMode) {
 	// Dual-schema emission controlled by feature gates
 	if !ScraperProcessDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
 		mb.metricProcessCPUUtilization.recordDataPoint(mb.startTime, ts, val, stateAttributeValue.String())
 	}
 	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
-		mb.metricProcessCPUUtilizationV1.recordDataPoint(mb.startTime, ts, val, stateAttributeValue.String(), true)
+		mb.metricProcessCPUUtilizationV1.recordDataPoint(mb.startTime, ts, val, cpuModeAttributeValue.String(), stateAttributeValue.String(), true)
 	}
 }
 
 // RecordProcessDiskIoDataPoint adds a data point to process.disk.io metric.
-func (mb *MetricsBuilder) RecordProcessDiskIoDataPoint(ts pcommon.Timestamp, val int64, directionAttributeValue AttributeDirection) {
+func (mb *MetricsBuilder) RecordProcessDiskIoDataPoint(ts pcommon.Timestamp, val int64, directionAttributeValue AttributeDirection, diskIoDirectionAttributeValue AttributeDiskIoDirection) {
 	// Dual-schema emission controlled by feature gates
 	if !ScraperProcessDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
 		mb.metricProcessDiskIo.recordDataPoint(mb.startTime, ts, val, directionAttributeValue.String())
 	}
 	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
-		mb.metricProcessDiskIoV1.recordDataPoint(mb.startTime, ts, val, directionAttributeValue.String(), true)
+		mb.metricProcessDiskIoV1.recordDataPoint(mb.startTime, ts, val, diskIoDirectionAttributeValue.String(), directionAttributeValue.String(), true)
 	}
 }
 
 // RecordProcessDiskOperationsDataPoint adds a data point to process.disk.operations metric.
-func (mb *MetricsBuilder) RecordProcessDiskOperationsDataPoint(ts pcommon.Timestamp, val int64, directionAttributeValue AttributeDirection) {
+func (mb *MetricsBuilder) RecordProcessDiskOperationsDataPoint(ts pcommon.Timestamp, val int64, directionAttributeValue AttributeDirection, diskIoDirectionAttributeValue AttributeDiskIoDirection) {
 	// Dual-schema emission controlled by feature gates
 	if !ScraperProcessDontEmitV0SystemConventionsFeatureGate.IsEnabled() {
 		mb.metricProcessDiskOperations.recordDataPoint(mb.startTime, ts, val, directionAttributeValue.String())
 	}
 	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
-		mb.metricProcessDiskOperationsV1.recordDataPoint(mb.startTime, ts, val, directionAttributeValue.String(), true)
+		mb.metricProcessDiskOperationsV1.recordDataPoint(mb.startTime, ts, val, diskIoDirectionAttributeValue.String(), directionAttributeValue.String(), true)
 	}
 }
 

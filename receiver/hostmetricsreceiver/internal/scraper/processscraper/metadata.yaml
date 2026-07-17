@@ -97,7 +97,7 @@ attributes:
     description: The CPU mode for this data point.
     type: string
     requirement_level: recommended
-    enum: [system, user, wait]
+    enum: [system, user, iowait]
 
   direction:
     description: Direction of flow of bytes (read or write).

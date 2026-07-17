@@ -138,7 +138,7 @@ Emitted Name: `process.cpu.time`
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
-| cpu.mode | The CPU mode for this data point. | Str: ``system``, ``user``, ``wait`` | Recommended | - |
+| cpu.mode | The CPU mode for this data point. | Str: ``system``, ``user``, ``iowait`` | Recommended | - |
 
 ### process.cpu.utilization
 
@@ -176,7 +176,7 @@ Emitted Name: `process.cpu.utilization`
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
-| cpu.mode | The CPU mode for this data point. | Str: ``system``, ``user``, ``wait`` | Recommended | - |
+| cpu.mode | The CPU mode for this data point. | Str: ``system``, ``user``, ``iowait`` | Recommended | - |
 
 ### process.disk.io@v1
 

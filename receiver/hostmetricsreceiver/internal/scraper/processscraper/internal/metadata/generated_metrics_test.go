@@ -140,22 +140,22 @@ func TestMetricsBuilder(t *testing.T) {
 			if tt.name != "all_set" {
 				defaultMetricsCount++
 				allMetricsCount++
-				mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeStateSystem)
+				mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeStateSystem, AttributeCPUModeSystem)
 			}
 			if tt.name != "all_set" {
 
 				allMetricsCount++
-				mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeStateSystem)
+				mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeStateSystem, AttributeCPUModeSystem)
 			}
 			if tt.name != "all_set" {
 				defaultMetricsCount++
 				allMetricsCount++
-				mb.RecordProcessDiskIoDataPoint(ts, 1, AttributeDirectionRead)
+				mb.RecordProcessDiskIoDataPoint(ts, 1, AttributeDirectionRead, AttributeDiskIoDirectionRead)
 			}
 			if tt.name != "all_set" {
 
 				allMetricsCount++
-				mb.RecordProcessDiskOperationsDataPoint(ts, 1, AttributeDirectionRead)
+				mb.RecordProcessDiskOperationsDataPoint(ts, 1, AttributeDirectionRead, AttributeDiskIoDirectionRead)
 			}
 
 			allMetricsCount++
@@ -508,7 +508,7 @@ func TestVersionedMetrics(t *testing.T) {
 				settings := scrapertest.NewNopSettings(scrapertest.NopType)
 				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
 
-				mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeStateSystem)
+				mb.RecordProcessCPUTimeDataPoint(ts, 1, AttributeStateSystem, AttributeCPUModeSystem)
 
 				metrics := mb.Emit(WithResource(pcommon.NewResource()))
 
@@ -592,7 +592,7 @@ func TestVersionedMetrics(t *testing.T) {
 				settings := scrapertest.NewNopSettings(scrapertest.NopType)
 				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
 
-				mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeStateSystem)
+				mb.RecordProcessCPUUtilizationDataPoint(ts, 1, AttributeStateSystem, AttributeCPUModeSystem)
 
 				metrics := mb.Emit(WithResource(pcommon.NewResource()))
 
@@ -676,7 +676,7 @@ func TestVersionedMetrics(t *testing.T) {
 				settings := scrapertest.NewNopSettings(scrapertest.NopType)
 				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
 
-				mb.RecordProcessDiskIoDataPoint(ts, 1, AttributeDirectionRead)
+				mb.RecordProcessDiskIoDataPoint(ts, 1, AttributeDirectionRead, AttributeDiskIoDirectionRead)
 
 				metrics := mb.Emit(WithResource(pcommon.NewResource()))
 
@@ -760,7 +760,7 @@ func TestVersionedMetrics(t *testing.T) {
 				settings := scrapertest.NewNopSettings(scrapertest.NopType)
 				mb := NewMetricsBuilder(loadMetricsBuilderConfig(t, "all_set"), settings, WithStartTime(start))
 
-				mb.RecordProcessDiskOperationsDataPoint(ts, 1, AttributeDirectionRead)
+				mb.RecordProcessDiskOperationsDataPoint(ts, 1, AttributeDirectionRead, AttributeDiskIoDirectionRead)
 
 				metrics := mb.Emit(WithResource(pcommon.NewResource()))
 
