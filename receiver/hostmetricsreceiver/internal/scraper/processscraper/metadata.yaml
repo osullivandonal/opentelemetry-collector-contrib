@@ -22,8 +22,6 @@ feature_gates:
 
 sem_conv_version: 1.41.0
 
-reaggregation_enabled: true
-
 resource_attributes:
   process.cgroup:
     description: cgroup associated with the process (Linux only).
