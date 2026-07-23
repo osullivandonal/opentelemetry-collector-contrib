@@ -450,8 +450,18 @@ func (s *processScraper) scrapeAndAppendContextSwitchMetrics(ctx context.Context
 		}
 	}
 
-	s.mb.RecordProcessContextSwitchesDataPoint(now, contextSwitches.Involuntary, metadata.AttributeContextSwitchTypeInvoluntary)
-	s.mb.RecordProcessContextSwitchesDataPoint(now, contextSwitches.Voluntary, metadata.AttributeContextSwitchTypeVoluntary)
+	s.mb.RecordProcessContextSwitchesDataPoint(
+		now,
+		contextSwitches.Involuntary,
+		metadata.AttributeContextSwitchTypeInvoluntary,
+		metadata.AttributeProcessContextSwitchTypeInvoluntary,
+	)
+	s.mb.RecordProcessContextSwitchesDataPoint(
+		now,
+		contextSwitches.Voluntary,
+		metadata.AttributeContextSwitchTypeVoluntary,
+		metadata.AttributeProcessContextSwitchTypeVoluntary,
+	)
 
 	return nil
 }
