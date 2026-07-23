@@ -66,7 +66,7 @@ The amount of physical memory in use.
 
 ### process.memory.virtual
 
-Virtual memory size.
+The amount of committed virtual memory.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
@@ -122,7 +122,7 @@ Emitted Name: `process.context_switches`
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
 | ---- | ----------- | ------ | ----------------- | ------------------- |
-| type | Specifies whether the context switches for this data point were voluntary or involuntary. | Str: ``involuntary``, ``voluntary`` | Recommended | - |
+| process.context_switch.type | Specifies whether the context switches for this data point were voluntary or involuntary. | Str: ``involuntary``, ``voluntary`` | Recommended | - |
 
 ### process.cpu.time@v1
 
@@ -242,6 +242,14 @@ This metric is only available on Windows.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {count} | Sum | Int | Cumulative | false | Development |
 
+#### Migration
+
+- Target Metric: `process.windows.handle.count@v1`
+- Disable Old Gate: `scraper.process.DontEmitV0SystemConventions`
+- Enable New Gate: `scraper.process.EmitV1SystemConventions`
+
+When the disable-old gate is enabled, emission of this metric is suppressed. When the enable-new gate is enabled, the target metric is emitted. If both gates are disabled, only this metric is emitted; if both are enabled, only the target metric is emitted.
+
 ### process.memory.utilization
 
 Percentage of total physical memory that is used by the process.
@@ -278,6 +286,32 @@ This metric is only available on Linux.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {faults} | Sum | Int | Cumulative | true | Development |
 
+#### Migration
+
+- Target Metric: `process.paging.faults@v1`
+- Disable Old Gate: `scraper.process.DontEmitV0SystemConventions`
+- Enable New Gate: `scraper.process.EmitV1SystemConventions`
+
+When the disable-old gate is enabled, emission of this metric is suppressed. When the enable-new gate is enabled, the target metric is emitted. If both gates are disabled, only this metric is emitted; if both are enabled, only the target metric is emitted.
+
+#### Attributes
+
+| Name | Description | Values | Requirement Level | Semantic Convention |
+| ---- | ----------- | ------ | ----------------- | ------------------- |
+| type | Type of memory paging fault. | Str: ``major``, ``minor`` | Recommended | - |
+
+### process.paging.faults@v1
+
+Number of page faults the process has made.
+
+This metric is only available on Linux.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
+| ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
+| {fault} | Sum | Int | Cumulative | true | Development |
+
+Emitted Name: `process.paging.faults`
+
 #### Attributes
 
 | Name | Description | Values | Requirement Level | Semantic Convention |
@@ -300,7 +334,7 @@ Process threads count.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic | Stability |
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
-| {threads} | Sum | Int | Cumulative | false | Development |
+| {thread} | Sum | Int | Cumulative | false | Development |
 
 Emitted Name: `process.thread.count`
 
@@ -338,7 +372,7 @@ The time the process has been running.
 | ---- | ----------- | ---------- | --------- |
 | s | Gauge | Double | Development |
 
-### process.windows.handles@v1
+### process.windows.handle.count@v1
 
 Number of handles held by the process.
 
@@ -348,7 +382,7 @@ This metric is only available on Windows.
 | ---- | ----------- | ---------- | ----------------------- | --------- | --------- |
 | {handle} | Sum | Int | Cumulative | false | Development |
 
-Emitted Name: `process.windows.handles`
+Emitted Name: `process.windows.handle.count`
 
 ## Resource Attributes
 

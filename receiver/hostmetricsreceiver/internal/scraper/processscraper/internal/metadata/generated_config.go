@@ -61,7 +61,7 @@ func (ms *ProcessContextSwitchesMetricConfig) Validate() error {
 type ProcessContextSwitchesV1MetricAttributeKey string
 
 const (
-	ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1 ProcessContextSwitchesV1MetricAttributeKey = "type"
+	ProcessContextSwitchesV1MetricAttributeKeyProcessContextSwitchType ProcessContextSwitchesV1MetricAttributeKey = "process.context_switch.type"
 )
 
 // ProcessContextSwitchesV1MetricConfig provides config for the process.context_switches@v1 metric.
@@ -90,9 +90,9 @@ func (ms *ProcessContextSwitchesV1MetricConfig) Unmarshal(parser *confmap.Conf) 
 func (ms *ProcessContextSwitchesV1MetricConfig) Validate() error {
 	for _, val := range ms.EnabledAttributes {
 		switch val {
-		case ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1:
+		case ProcessContextSwitchesV1MetricAttributeKeyProcessContextSwitchType:
 		default:
-			return fmt.Errorf("metric process.context_switches@v1 doesn't have an attribute %v, valid attributes: [type]", val)
+			return fmt.Errorf("metric process.context_switches@v1 doesn't have an attribute %v, valid attributes: [process.context_switch.type]", val)
 		}
 	}
 
@@ -637,6 +637,54 @@ func (ms *ProcessPagingFaultsMetricConfig) Validate() error {
 	return nil
 }
 
+// ProcessPagingFaultsV1MetricAttributeKey specifies the key of an attribute for the process.paging.faults@v1 metric.
+type ProcessPagingFaultsV1MetricAttributeKey string
+
+const (
+	ProcessPagingFaultsV1MetricAttributeKeySystemPagingFaultType ProcessPagingFaultsV1MetricAttributeKey = "type"
+)
+
+// ProcessPagingFaultsV1MetricConfig provides config for the process.paging.faults@v1 metric.
+type ProcessPagingFaultsV1MetricConfig struct {
+	Enabled          bool `mapstructure:"enabled"`
+	enabledSetByUser bool
+
+	AggregationStrategy string                                    `mapstructure:"aggregation_strategy"`
+	EnabledAttributes   []ProcessPagingFaultsV1MetricAttributeKey `mapstructure:"attributes"`
+}
+
+func (ms *ProcessPagingFaultsV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+	if parser == nil {
+		return nil
+	}
+
+	err := parser.Unmarshal(ms)
+	if err != nil {
+		return err
+	}
+
+	ms.enabledSetByUser = parser.IsSet("enabled")
+	return nil
+}
+
+func (ms *ProcessPagingFaultsV1MetricConfig) Validate() error {
+	for _, val := range ms.EnabledAttributes {
+		switch val {
+		case ProcessPagingFaultsV1MetricAttributeKeySystemPagingFaultType:
+		default:
+			return fmt.Errorf("metric process.paging.faults@v1 doesn't have an attribute %v, valid attributes: [type]", val)
+		}
+	}
+
+	switch ms.AggregationStrategy {
+	case AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax:
+	default:
+		return fmt.Errorf("invalid aggregation strategy %q, valid strategies: [%s, %s, %s, %s]", ms.AggregationStrategy, AggregationStrategySum, AggregationStrategyAvg, AggregationStrategyMin, AggregationStrategyMax)
+	}
+
+	return nil
+}
+
 // ProcessSignalsPendingMetricConfig provides config for the process.signals_pending metric.
 type ProcessSignalsPendingMetricConfig struct {
 	Enabled          bool `mapstructure:"enabled"`
@@ -737,13 +785,13 @@ func (ms *ProcessUptimeMetricConfig) Unmarshal(parser *confmap.Conf) error {
 	return nil
 }
 
-// ProcessWindowsHandlesV1MetricConfig provides config for the process.windows.handles@v1 metric.
-type ProcessWindowsHandlesV1MetricConfig struct {
+// ProcessWindowsHandleCountV1MetricConfig provides config for the process.windows.handle.count@v1 metric.
+type ProcessWindowsHandleCountV1MetricConfig struct {
 	Enabled          bool `mapstructure:"enabled"`
 	enabledSetByUser bool
 }
 
-func (ms *ProcessWindowsHandlesV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
+func (ms *ProcessWindowsHandleCountV1MetricConfig) Unmarshal(parser *confmap.Conf) error {
 	if parser == nil {
 		return nil
 	}
@@ -775,12 +823,13 @@ type MetricsConfig struct {
 	ProcessMemoryVirtual             ProcessMemoryVirtualMetricConfig             `mapstructure:"process.memory.virtual"`
 	ProcessOpenFileDescriptors       ProcessOpenFileDescriptorsMetricConfig       `mapstructure:"process.open_file_descriptors"`
 	ProcessPagingFaults              ProcessPagingFaultsMetricConfig              `mapstructure:"process.paging.faults"`
+	ProcessPagingFaultsV1            ProcessPagingFaultsV1MetricConfig            `mapstructure:"process.paging.faults@v1"`
 	ProcessSignalsPending            ProcessSignalsPendingMetricConfig            `mapstructure:"process.signals_pending"`
 	ProcessThreadCountV1             ProcessThreadCountV1MetricConfig             `mapstructure:"process.thread.count@v1"`
 	ProcessThreads                   ProcessThreadsMetricConfig                   `mapstructure:"process.threads"`
 	ProcessUnixFileDescriptorCountV1 ProcessUnixFileDescriptorCountV1MetricConfig `mapstructure:"process.unix.file_descriptor.count@v1"`
 	ProcessUptime                    ProcessUptimeMetricConfig                    `mapstructure:"process.uptime"`
-	ProcessWindowsHandlesV1          ProcessWindowsHandlesV1MetricConfig          `mapstructure:"process.windows.handles@v1"`
+	ProcessWindowsHandleCountV1      ProcessWindowsHandleCountV1MetricConfig      `mapstructure:"process.windows.handle.count@v1"`
 }
 
 func DefaultMetricsConfig() MetricsConfig {
@@ -793,7 +842,7 @@ func DefaultMetricsConfig() MetricsConfig {
 		ProcessContextSwitchesV1: ProcessContextSwitchesV1MetricConfig{
 			Enabled:             false,
 			AggregationStrategy: AggregationStrategySum,
-			EnabledAttributes:   []ProcessContextSwitchesV1MetricAttributeKey{ProcessContextSwitchesV1MetricAttributeKeyContextSwitchTypeV1},
+			EnabledAttributes:   []ProcessContextSwitchesV1MetricAttributeKey{ProcessContextSwitchesV1MetricAttributeKeyProcessContextSwitchType},
 		},
 		ProcessCPUTime: ProcessCPUTimeMetricConfig{
 			Enabled:             true,
@@ -855,6 +904,11 @@ func DefaultMetricsConfig() MetricsConfig {
 			AggregationStrategy: AggregationStrategySum,
 			EnabledAttributes:   []ProcessPagingFaultsMetricAttributeKey{ProcessPagingFaultsMetricAttributeKeyPagingFaultType},
 		},
+		ProcessPagingFaultsV1: ProcessPagingFaultsV1MetricConfig{
+			Enabled:             false,
+			AggregationStrategy: AggregationStrategySum,
+			EnabledAttributes:   []ProcessPagingFaultsV1MetricAttributeKey{ProcessPagingFaultsV1MetricAttributeKeySystemPagingFaultType},
+		},
 		ProcessSignalsPending: ProcessSignalsPendingMetricConfig{
 			Enabled: false,
 		},
@@ -870,7 +924,7 @@ func DefaultMetricsConfig() MetricsConfig {
 		ProcessUptime: ProcessUptimeMetricConfig{
 			Enabled: false,
 		},
-		ProcessWindowsHandlesV1: ProcessWindowsHandlesV1MetricConfig{
+		ProcessWindowsHandleCountV1: ProcessWindowsHandleCountV1MetricConfig{
 			Enabled: false,
 		},
 	}

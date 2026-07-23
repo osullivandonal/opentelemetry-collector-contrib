@@ -77,13 +77,6 @@ resource_attributes:
     type: int
 
 attributes:
-  context_switch.type@v1:
-    name_override: type
-    description: Specifies whether the context switches for this data point were voluntary or involuntary.
-    type: string
-    requirement_level: recommended
-    enum: [involuntary, voluntary]
-
   context_switch_type:
     name_override: type
     description: Type of context switched.
@@ -116,11 +109,24 @@ attributes:
     requirement_level: recommended
     enum: [major, minor]
 
+  process.context_switch.type:
+    description: Specifies whether the context switches for this data point were voluntary or involuntary.
+    type: string
+    requirement_level: recommended
+    enum: [involuntary, voluntary]
+
   state:
     description: Breakdown of CPU usage by type.
     type: string
     requirement_level: recommended
     enum: [system, user, wait]
+
+  system.paging.fault.type:
+    name_override: type
+    description: Type of memory paging fault.
+    type: string
+    requirement_level: recommended
+    enum: [major, minor]
 
 metrics:
   process.context_switches:
@@ -150,7 +156,7 @@ metrics:
       value_type: int
       aggregation_temporality: cumulative
       monotonic: true
-    attributes: [context_switch.type@v1]
+    attributes: [process.context_switch.type]
 
   process.cpu.time:
     enabled: true
@@ -272,6 +278,11 @@ metrics:
       value_type: int
       aggregation_temporality: cumulative
       monotonic: false
+    migration:
+      to: process.windows.handle.count@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
 
   process.memory.usage:
     enabled: true
@@ -293,7 +304,7 @@ metrics:
 
   process.memory.virtual:
     enabled: true
-    description: Virtual memory size.
+    description: The amount of committed virtual memory.
     unit: By
     stability: development
     sum:
@@ -331,6 +342,23 @@ metrics:
       aggregation_temporality: cumulative
       monotonic: true
     attributes: [paging_fault_type]
+    migration:
+      to: process.paging.faults@v1
+      through_gates:
+        disable_old: scraper.process.DontEmitV0SystemConventions
+        enable_new: scraper.process.EmitV1SystemConventions
+
+  process.paging.faults@v1:
+    enabled: false
+    description: Number of page faults the process has made.
+    extended_documentation: This metric is only available on Linux.
+    unit: "{fault}"
+    stability: development
+    sum:
+      value_type: int
+      aggregation_temporality: cumulative
+      monotonic: true
+    attributes: [system.paging.fault.type]
 
   process.signals_pending:
     enabled: false
@@ -346,7 +374,7 @@ metrics:
   process.thread.count@v1:
     enabled: false
     description: Process threads count.
-    unit: "{threads}"
+    unit: "{thread}"
     stability: development
     sum:
       value_type: int
@@ -386,7 +414,7 @@ metrics:
     gauge:
       value_type: double
 
-  process.windows.handles@v1:
+  process.windows.handle.count@v1:
     enabled: false
     description: Number of handles held by the process.
     extended_documentation: This metric is only available on Windows.

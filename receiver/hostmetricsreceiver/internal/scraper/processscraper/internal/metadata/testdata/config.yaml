@@ -6,7 +6,7 @@ all_set:
       attributes: ["type"]
     process.context_switches@v1:
       enabled: true
-      attributes: ["type"]
+      attributes: ["process.context_switch.type"]
     process.cpu.time:
       enabled: true
       attributes: ["state"]
@@ -44,6 +44,9 @@ all_set:
     process.paging.faults:
       enabled: true
       attributes: ["type"]
+    process.paging.faults@v1:
+      enabled: true
+      attributes: ["type"]
     process.signals_pending:
       enabled: true
     process.thread.count@v1:
@@ -54,7 +57,7 @@ all_set:
       enabled: true
     process.uptime:
       enabled: true
-    process.windows.handles@v1:
+    process.windows.handle.count@v1:
       enabled: true
   resource_attributes:
     process.cgroup:
@@ -120,6 +123,9 @@ reaggregate_set:
     process.paging.faults:
       enabled: true
       attributes: []
+    process.paging.faults@v1:
+      enabled: true
+      attributes: []
     process.signals_pending:
       enabled: true
     process.thread.count@v1:
@@ -130,7 +136,7 @@ reaggregate_set:
       enabled: true
     process.uptime:
       enabled: true
-    process.windows.handles@v1:
+    process.windows.handle.count@v1:
       enabled: true
   resource_attributes:
     process.cgroup:
@@ -158,7 +164,7 @@ none_set:
       attributes: ["type"]
     process.context_switches@v1:
       enabled: false
-      attributes: ["type"]
+      attributes: ["process.context_switch.type"]
     process.cpu.time:
       enabled: false
       attributes: ["state"]
@@ -196,6 +202,9 @@ none_set:
     process.paging.faults:
       enabled: false
       attributes: ["type"]
+    process.paging.faults@v1:
+      enabled: false
+      attributes: ["type"]
     process.signals_pending:
       enabled: false
     process.thread.count@v1:
@@ -206,7 +215,7 @@ none_set:
       enabled: false
     process.uptime:
       enabled: false
-    process.windows.handles@v1:
+    process.windows.handle.count@v1:
       enabled: false
   resource_attributes:
     process.cgroup:
