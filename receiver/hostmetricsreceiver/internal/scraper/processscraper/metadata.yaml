@@ -20,7 +20,7 @@ feature_gates:
     from_version: v0.154.0
     reference_url: https://github.com/open-telemetry/semantic-conventions/issues/3041
 
-sem_conv_version: 1.41.0
+sem_conv_version: 1.43.0
 
 resource_attributes:
   process.cgroup:

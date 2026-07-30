@@ -143,7 +143,7 @@ func assertIncludesExpectedMetrics(t *testing.T, got pmetric.Metrics) {
 		returnedMetricNames := getReturnedMetricNames(metrics)
 		for k := range returnedMetricNames {
 			if strings.HasPrefix(k, "process.") {
-				assert.Equal(t, "https://opentelemetry.io/schemas/1.41.0", rm.SchemaUrl(),
+				assert.Equal(t, "https://opentelemetry.io/schemas/1.43.0", rm.SchemaUrl(),
 					"SchemaURL is incorrect for metrics: %v", returnedMetricNames)
 			} else {
 				assert.Equal(t, "https://opentelemetry.io/schemas/1.9.0", rm.SchemaUrl(),
