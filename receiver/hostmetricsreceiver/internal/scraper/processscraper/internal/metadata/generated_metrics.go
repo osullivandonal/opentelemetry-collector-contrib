@@ -2171,14 +2171,18 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessContextSwitchesV1.data = pmetric.NewMetric()
 			mb.metricProcessContextSwitchesV1.init()
 		}
-
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricProcessContextSwitches.config.Enabled && mb.metricProcessContextSwitchesV1.config.Enabled {
 			var disable bool
 			if mb.metricProcessContextSwitches.data.Type() != mb.metricProcessContextSwitchesV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.context_switches` disabled: same emitted name as `process.context_switches@v1` with different type; only latest will be emitted")
 			}
 			if !slices.Equal(MetricsInfo.ProcessContextSwitches.Attributes, MetricsInfo.ProcessContextSwitchesV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.context_switches` disabled: same emitted name as `process.context_switches@v1` with different attributes; only latest will be emitted with combined attributes",
 					zap.Strings("legacy_attributes", MetricsInfo.ProcessContextSwitches.Attributes),
@@ -2200,14 +2204,18 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessCPUTimeV1.data = pmetric.NewMetric()
 			mb.metricProcessCPUTimeV1.init()
 		}
-
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricProcessCPUTime.config.Enabled && mb.metricProcessCPUTimeV1.config.Enabled {
 			var disable bool
 			if mb.metricProcessCPUTime.data.Type() != mb.metricProcessCPUTimeV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.cpu.time` disabled: same emitted name as `process.cpu.time@v1` with different type; only latest will be emitted")
 			}
 			if !slices.Equal(MetricsInfo.ProcessCPUTime.Attributes, MetricsInfo.ProcessCPUTimeV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.cpu.time` disabled: same emitted name as `process.cpu.time@v1` with different attributes; only latest will be emitted with combined attributes",
 					zap.Strings("legacy_attributes", MetricsInfo.ProcessCPUTime.Attributes),
@@ -2229,14 +2237,18 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessCPUUtilizationV1.data = pmetric.NewMetric()
 			mb.metricProcessCPUUtilizationV1.init()
 		}
-
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricProcessCPUUtilization.config.Enabled && mb.metricProcessCPUUtilizationV1.config.Enabled {
 			var disable bool
 			if mb.metricProcessCPUUtilization.data.Type() != mb.metricProcessCPUUtilizationV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.cpu.utilization` disabled: same emitted name as `process.cpu.utilization@v1` with different type; only latest will be emitted")
 			}
 			if !slices.Equal(MetricsInfo.ProcessCPUUtilization.Attributes, MetricsInfo.ProcessCPUUtilizationV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.cpu.utilization` disabled: same emitted name as `process.cpu.utilization@v1` with different attributes; only latest will be emitted with combined attributes",
 					zap.Strings("legacy_attributes", MetricsInfo.ProcessCPUUtilization.Attributes),
@@ -2258,14 +2270,18 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessDiskIoV1.data = pmetric.NewMetric()
 			mb.metricProcessDiskIoV1.init()
 		}
-
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricProcessDiskIo.config.Enabled && mb.metricProcessDiskIoV1.config.Enabled {
 			var disable bool
 			if mb.metricProcessDiskIo.data.Type() != mb.metricProcessDiskIoV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.disk.io` disabled: same emitted name as `process.disk.io@v1` with different type; only latest will be emitted")
 			}
 			if !slices.Equal(MetricsInfo.ProcessDiskIo.Attributes, MetricsInfo.ProcessDiskIoV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.disk.io` disabled: same emitted name as `process.disk.io@v1` with different attributes; only latest will be emitted with combined attributes",
 					zap.Strings("legacy_attributes", MetricsInfo.ProcessDiskIo.Attributes),
@@ -2287,14 +2303,18 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessDiskOperationsV1.data = pmetric.NewMetric()
 			mb.metricProcessDiskOperationsV1.init()
 		}
-
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricProcessDiskOperations.config.Enabled && mb.metricProcessDiskOperationsV1.config.Enabled {
 			var disable bool
 			if mb.metricProcessDiskOperations.data.Type() != mb.metricProcessDiskOperationsV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.disk.operations` disabled: same emitted name as `process.disk.operations@v1` with different type; only latest will be emitted")
 			}
 			if !slices.Equal(MetricsInfo.ProcessDiskOperations.Attributes, MetricsInfo.ProcessDiskOperationsV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.disk.operations` disabled: same emitted name as `process.disk.operations@v1` with different attributes; only latest will be emitted with combined attributes",
 					zap.Strings("legacy_attributes", MetricsInfo.ProcessDiskOperations.Attributes),
@@ -2316,7 +2336,8 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessWindowsHandleCountV1.data = pmetric.NewMetric()
 			mb.metricProcessWindowsHandleCountV1.init()
 		}
-	} else if mb.metricProcessWindowsHandleCountV1.config.Enabled {
+	}
+	if !ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() && mb.metricProcessWindowsHandleCountV1.config.Enabled {
 		mb.metricProcessWindowsHandleCountV1.config.Enabled = false
 		settings.Logger.Warn("[WARNING] metric `process.windows.handle.count@v1` requires feature gate `scraper.process.EmitV1SystemConventions` to be enabled, metric has been disabled")
 	}
@@ -2326,7 +2347,8 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessUnixFileDescriptorCountV1.data = pmetric.NewMetric()
 			mb.metricProcessUnixFileDescriptorCountV1.init()
 		}
-	} else if mb.metricProcessUnixFileDescriptorCountV1.config.Enabled {
+	}
+	if !ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() && mb.metricProcessUnixFileDescriptorCountV1.config.Enabled {
 		mb.metricProcessUnixFileDescriptorCountV1.config.Enabled = false
 		settings.Logger.Warn("[WARNING] metric `process.unix.file_descriptor.count@v1` requires feature gate `scraper.process.EmitV1SystemConventions` to be enabled, metric has been disabled")
 	}
@@ -2336,14 +2358,18 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessPagingFaultsV1.data = pmetric.NewMetric()
 			mb.metricProcessPagingFaultsV1.init()
 		}
-
+	}
+	if ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() {
 		if mb.metricProcessPagingFaults.config.Enabled && mb.metricProcessPagingFaultsV1.config.Enabled {
 			var disable bool
 			if mb.metricProcessPagingFaults.data.Type() != mb.metricProcessPagingFaultsV1.data.Type() {
+				// Disable legacy metric if legacy and latest have same name but different types
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.paging.faults` disabled: same emitted name as `process.paging.faults@v1` with different type; only latest will be emitted")
 			}
 			if !slices.Equal(MetricsInfo.ProcessPagingFaults.Attributes, MetricsInfo.ProcessPagingFaultsV1.Attributes) {
+				// Disable legacy metric if legacy and latest have same name but different attributes
+				// The latest metric will emit both attribute sets during migration
 				disable = true
 				settings.Logger.Warn("[WARNING] Legacy metric `process.paging.faults` disabled: same emitted name as `process.paging.faults@v1` with different attributes; only latest will be emitted with combined attributes",
 					zap.Strings("legacy_attributes", MetricsInfo.ProcessPagingFaults.Attributes),
@@ -2365,7 +2391,8 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings scraper.Settings, opti
 			mb.metricProcessThreadCountV1.data = pmetric.NewMetric()
 			mb.metricProcessThreadCountV1.init()
 		}
-	} else if mb.metricProcessThreadCountV1.config.Enabled {
+	}
+	if !ScraperProcessEmitV1SystemConventionsFeatureGate.IsEnabled() && mb.metricProcessThreadCountV1.config.Enabled {
 		mb.metricProcessThreadCountV1.config.Enabled = false
 		settings.Logger.Warn("[WARNING] metric `process.thread.count@v1` requires feature gate `scraper.process.EmitV1SystemConventions` to be enabled, metric has been disabled")
 	}

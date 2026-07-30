@@ -326,4 +326,6 @@ retract (
 	v0.65.0
 )
 
+replace go.opentelemetry.io/collector/internal/schemagen => /home/dos/Documents/opentelemetry-collector/internal/schemagen
+
 replace go.opentelemetry.io/collector/cmd/mdatagen => /home/dos/Documents/opentelemetry-collector/cmd/mdatagen
